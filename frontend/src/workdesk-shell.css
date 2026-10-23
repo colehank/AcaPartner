@@ -1,0 +1,58 @@
+/* Neutral control shell and a light writing surface; no editor geometry or data transform. */
+.workspace-chrome{height:44px;padding:6px 12px;gap:12px;border-bottom:1px solid var(--rp-control-border);position:relative;z-index:10;overflow:visible}
+.workspace-primary-tools{display:flex;align-items:center;gap:4px;flex:none}
+.workspace-chrome .chrome-tool,.chrome-icon-button{height:30px;min-height:30px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:4px 8px;font-size:12px;line-height:20px;white-space:nowrap}
+.workspace-chrome .chrome-tool{border-color:transparent;border-radius:4px}
+.workspace-chrome .chrome-tool:hover{background:#414b53;border-color:#586772}
+.workspace-chrome .chrome-tool[aria-pressed=true]{background:#435865;border-color:#687f8e}
+.chrome-icon{display:block;width:16px;height:16px;flex:none}
+.chrome-divider{height:20px;width:1px;background:var(--rp-control-border);margin:0 5px;flex:none!important}
+.workspace-context{min-width:0;flex:1;display:flex;align-items:center;gap:8px;overflow:hidden;color:#a9bac4;font-size:12px}
+.workspace-context>span{flex:none}
+.workspace-context strong{font-weight:500;color:#e3e9ec;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workspace-draft-state{display:flex;align-items:center;gap:5px;white-space:nowrap;color:#bcc8cd;font-size:11px;flex:none!important}
+.workspace-draft-state i{height:5px;width:5px;border-radius:50%;background:#b4bec3}
+.workspace-draft-state.syncing i{background:#dbbf7a}.workspace-draft-state.error{padding:0;background:none;color:#f0c4b4}.workspace-draft-state.error i{background:#e4a08b}
+.workspace-hint{font-size:12px;line-height:1.6;position:absolute;right:12px;top:100%;max-width:min(500px,90vw);padding:8px 12px;color:#304750;background:#f4f3e8;border:1px solid #bac7ca;border-radius:4px;z-index:20;flex:none!important}
+.chrome-menu{position:relative;flex:none;display:inline-flex}
+.chrome-menu-popup{position:absolute;top:calc(100% + 6px);right:0;z-index:100;min-width:205px;max-width:min(300px,calc(100vw - 24px));padding:5px;background:#303940;color:#e4ebee;border:1px solid #5c6c76;border-radius:5px;box-shadow:0 6px 20px #1118}
+.chrome-menu-popup>button{width:100%;min-height:32px;display:flex;align-items:center;gap:7px;text-align:left;background:transparent!important;color:#e4ebee!important;border:1px solid transparent!important;border-radius:3px;white-space:nowrap;padding:5px 8px;font-size:13px!important;line-height:20px}
+.chrome-menu-popup>button:hover,.chrome-menu-popup>button:focus-visible{background:#445968!important;outline:1px solid #9abfd2!important;outline-offset:-1px}
+.chrome-menu-popup>button:disabled{opacity:.45}
+.chrome-menu-check{width:13px;flex:none}
+.note-toolbar{display:grid;grid-template-columns:28px 28px minmax(0,1fr) auto auto 30px;gap:5px;min-height:40px;padding:5px 8px;position:relative;z-index:5;overflow:visible!important}
+.note-toolbar>button{height:30px;min-height:30px;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:12px;padding:4px 7px}
+.note-toolbar .chrome-icon-button{width:28px;padding:4px}.note-toolbar .chrome-menu{width:30px}
+.note-toolbar .note-location{min-width:0;max-width:none;font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#607580}
+.note-dirty-marker{font-size:9px;margin-right:6px;color:transparent}.note-dirty-marker.dirty{color:#9c7023}
+.note-toolbar .note-save{font-weight:500}.note-toolbar .note-save:disabled{background:#d6dddc;color:#526870;border-color:#c3ccce;opacity:.65}
+.note-toolbar .chrome-menu-popup{color-scheme:dark}
+.note-toolbar .chrome-menu-popup button{white-space:nowrap}
+
+/* The continuous document scrolls on its own; contextual drawers keep a
+   reachable summary and never turn the whole reading column into a form. */
+.paper-editor[aria-label="连续稿件审查"]{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+.manuscript-tools{align-items:center;gap:5px;padding:5px 9px;min-height:40px}
+.manuscript-tools>[role=group]{display:flex;gap:2px;flex:none}
+.manuscript-tools .path{min-width:0;flex:1 0 100px;font-size:12px}
+.manuscript-tools button,.continuous-manuscript>[role=toolbar] button{min-height:30px;height:30px;padding:4px 8px;font-size:12px;line-height:20px}
+.continuous-manuscript>[role=toolbar]{display:flex;align-items:center;flex-wrap:wrap;gap:5px;padding:6px 12px;border-bottom:1px solid #e1e6e4;background:var(--rp-paper);font-size:12px}
+.continuous-manuscript button,.manuscript-decisions button,.manuscript-caption-tools button{background:#f5f7f2;border:1px solid #c1cecf;color:var(--rp-ink);font-size:12px;line-height:20px;min-height:30px;padding:4px 8px;max-width:100%;white-space:normal}
+.continuous-manuscript button:hover,.manuscript-decisions button:hover,.manuscript-caption-tools button:hover{background:#e6eeeb}
+.manuscript-decisions{flex:none;max-height:28%;overflow:auto;padding:10px 14px;border-top:1px solid #cbd5d5;background:#eef2ed;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+.manuscript-decisions>small{display:block;margin-bottom:6px;color:var(--rp-muted)}
+.manuscript-decisions>div{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:7px 0}
+.manuscript-decisions>div>span{flex:1;min-width:70px}
+.manuscript-decisions [role=alert]{width:100%;margin:0;color:#874a3a}
+.manuscript-decisions>button{margin:3px 6px 0 0}
+.manuscript-caption-tools{flex:none;min-height:34px;max-height:38%;overflow:auto;border-top:1px solid #cbd5d5;background:#f2f4ef;font-size:12px;line-height:1.7}
+.manuscript-caption-tools>summary{min-height:34px;padding:7px 14px;cursor:pointer;color:var(--rp-ink)}
+.manuscript-caption-tools>summary:focus-visible{outline:2px solid var(--rp-focus);outline-offset:-2px}
+.manuscript-caption-tools .paper-caption-review{margin:0;padding:12px 14px;border:0;border-radius:0;background:var(--rp-paper);font-size:13px;min-width:0}
+.manuscript-caption-tools .caption-review-heading{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.manuscript-caption-tools .caption-review-heading h2{flex:1 0 140px;font-size:15px;margin:0 8px 0 0}
+.manuscript-caption-tools .paper-caption-position{margin:12px 0;padding:12px;min-width:0;overflow-wrap:anywhere}
+.manuscript-caption-tools textarea,.manuscript-caption-tools select{display:block;width:100%;max-width:100%;background:var(--rp-paper);color:var(--rp-ink);border-color:#bdcdce;font:inherit;line-height:1.7}
+.manuscript-caption-tools textarea{min-height:76px;resize:vertical}
+@media(max-width:900px){.workspace-context{display:none}.workspace-chrome{gap:8px}.workspace-primary-tools{flex:1}}
+@media(max-width:650px){.workspace-chrome{height:auto;min-height:44px;flex-wrap:wrap}.workspace-primary-tools{width:100%;justify-content:space-between}.workspace-chrome .chrome-tool{padding:4px 5px}.workspace-draft-state{margin-left:auto}.workspace-chrome>.chrome-menu{margin-left:auto}.workspace-chrome .chrome-divider{display:none}}

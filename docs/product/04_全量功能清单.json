@@ -1,0 +1,1274 @@
+{
+  "product": "AcaWorker / Research Partner",
+  "purpose": "完整产品开发的全量范围；不是软件已完成声明",
+  "scope_change_rule": "不得删减或降级必交付项；实质范围变更须用户明确批准",
+  "goals": [
+    "G01",
+    "G02",
+    "G03",
+    "G04",
+    "G05",
+    "G06",
+    "G07",
+    "G08",
+    "G09",
+    "G10"
+  ],
+  "requirements": [
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R05",
+    "R06",
+    "R07",
+    "R08",
+    "R09",
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    "R14",
+    "R15",
+    "R16",
+    "R17",
+    "R18",
+    "R19",
+    "R20",
+    "R21",
+    "R22"
+  ],
+  "modules": [
+    {
+      "id": "M01",
+      "title": "产品边界与真实建设进度"
+    },
+    {
+      "id": "M02",
+      "title": "科研委托与问题形成"
+    },
+    {
+      "id": "M03",
+      "title": "研究图谱与项目资产"
+    },
+    {
+      "id": "M04",
+      "title": "科研协作组织"
+    },
+    {
+      "id": "M05",
+      "title": "学术产出工作区"
+    },
+    {
+      "id": "M06",
+      "title": "反馈与成果修订"
+    },
+    {
+      "id": "M07",
+      "title": "科学讨论与用户决策"
+    },
+    {
+      "id": "M08",
+      "title": "科学质量与独立审查"
+    },
+    {
+      "id": "M09",
+      "title": "成长、案例与外部学习"
+    },
+    {
+      "id": "M10",
+      "title": "源码、分发与可维护性"
+    },
+    {
+      "id": "M11",
+      "title": "研究工坊"
+    },
+    {
+      "id": "M12",
+      "title": "Agent 持久运行与调度"
+    },
+    {
+      "id": "M13",
+      "title": "模型、工具与模块扩展"
+    },
+    {
+      "id": "M14",
+      "title": "自主部署、执行主机与安全"
+    },
+    {
+      "id": "M15",
+      "title": "文献获取与引用依据"
+    }
+  ],
+  "stages": {
+    "B0": [],
+    "B1": [
+      "B0"
+    ],
+    "B2": [
+      "B1"
+    ],
+    "B3": [
+      "B2"
+    ],
+    "B4": [
+      "B1"
+    ],
+    "B5": [
+      "B2",
+      "B3"
+    ],
+    "B6": [
+      "B4",
+      "B5"
+    ]
+  },
+  "scenarios": {
+    "S01": {
+      "required": true
+    },
+    "S02": {
+      "required": true
+    },
+    "S03": {
+      "required": true
+    },
+    "S04": {
+      "required": true
+    },
+    "S05": {
+      "required": true
+    },
+    "S06": {
+      "required": true,
+      "required_subcases": [
+        "论文",
+        "海报",
+        "PPT与逐页讲稿"
+      ]
+    },
+    "S07": {
+      "required": true,
+      "required_subcases": [
+        "刺激准备",
+        "图像与标注清洗",
+        "神经数据预处理",
+        "可视化工具",
+        "实验软件"
+      ]
+    },
+    "S08": {
+      "required": true
+    },
+    "S09": {
+      "required": true
+    },
+    "S10": {
+      "required": true
+    },
+    "S11": {
+      "required": true
+    },
+    "S12": {
+      "required": true
+    },
+    "S13": {
+      "required": true
+    },
+    "S14": {
+      "required": true
+    },
+    "S15": {
+      "required": true
+    },
+    "S16": {
+      "required": true
+    },
+    "S17": {
+      "required": true
+    },
+    "S18": {
+      "required": true
+    },
+    "S19": {
+      "required": true
+    },
+    "S20": {
+      "required": true
+    },
+    "S21": {
+      "required": true
+    },
+    "S22": {
+      "required": true
+    },
+    "S23": {
+      "required": true
+    },
+    "S24": {
+      "required": true
+    }
+  },
+  "capabilities": [
+    {
+      "id": "C01",
+      "title": "独立软件仓库与构建入口",
+      "goal": "G08",
+      "requirements": [
+        "R17",
+        "R19"
+      ],
+      "modules": [
+        "M10"
+      ],
+      "stage": "B0",
+      "scenarios": [
+        "S10"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "在旧仓库外新建 Git 仓库，真实构建和运行；源码、依赖、安装入口与旧资产迁移边界齐备。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C02",
+      "title": "开发接续与总完成门槛",
+      "goal": "G10",
+      "requirements": [
+        "R15",
+        "R16",
+        "R18"
+      ],
+      "modules": [
+        "M01",
+        "M12"
+      ],
+      "stage": "B0",
+      "scenarios": [
+        "S11",
+        "S24"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "开发工作单元退出后检查全量任务债务并接续；缺项、跳过、假验收和外部阻塞不能记为产品完成。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C03",
+      "title": "独立 Agent 常驻运行",
+      "goal": "G05",
+      "requirements": [
+        "R17",
+        "R19",
+        "R20",
+        "R21"
+      ],
+      "modules": [
+        "M12"
+      ],
+      "stage": "B1",
+      "scenarios": [
+        "S12"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "实际服务独立于 GUI 生命周期；关闭界面后已授权任务继续，CLI 与 GUI 观察同一任务。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C04",
+      "title": "持久任务、失败恢复与幂等",
+      "goal": "G05",
+      "requirements": [
+        "R17",
+        "R18"
+      ],
+      "modules": [
+        "M12",
+        "M04"
+      ],
+      "stage": "B1",
+      "scenarios": [
+        "S12"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "队列、依赖、检查点、失败和副作用记录可恢复；重启或重复请求不悄悄重复写入成果。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C05",
+      "title": "真实模型与工具适配",
+      "goal": "G05",
+      "requirements": [
+        "R12",
+        "R17",
+        "R20"
+      ],
+      "modules": [
+        "M13"
+      ],
+      "stage": "B1",
+      "scenarios": [
+        "S13"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "至少两种真实可用模型适配路线及一项实际外部工具调用；替换提供者不改变研究对象，缺凭据明确受阻。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C06",
+      "title": "反馈请求确实进入执行",
+      "goal": "G06",
+      "requirements": [
+        "R02",
+        "R13"
+      ],
+      "modules": [
+        "M06",
+        "M12"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S04"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "明确保存与请求修订的区别；请求入队并执行，在同一成果看到实际修改，失败与取消如实显示。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C07",
+      "title": "协作分派、指导、审查与整合",
+      "goal": "G05",
+      "requirements": [
+        "R12",
+        "R17"
+      ],
+      "modules": [
+        "M04"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S14"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "主 Agent 指导可并行子任务，审查返工并整合可用结果；保留 Codex 与 DeepSeek 的可接入协作路径而不写死角色。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C08",
+      "title": "独立可传递的委托上下文",
+      "goal": "G03",
+      "requirements": [
+        "R07"
+      ],
+      "modules": [
+        "M02"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S03"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "每次委托的文档与可访问资料能独立说明背景、问题、已有探索、边界和产出，不依赖旧聊天。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C09",
+      "title": "相关项目建档、维护与命名",
+      "goal": "G01",
+      "requirements": [
+        "R04"
+      ],
+      "modules": [
+        "M03"
+      ],
+      "stage": "B1",
+      "scenarios": [
+        "S02"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "Agent 管理授权服务范围内的项目和稳定成果标识，支持改名、归档、恢复、分类和检索。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C10",
+      "title": "可增长的研究图谱",
+      "goal": "G01",
+      "requirements": [
+        "R05"
+      ],
+      "modules": [
+        "M03"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S02"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "从概念分域展开到项目、问题和成果；可搜索定位、纠正关联与去重；新任务增长而不丢旧位置。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C11",
+      "title": "跨项目复用与关联权限",
+      "goal": "G01",
+      "requirements": [
+        "R04",
+        "R06",
+        "R20"
+      ],
+      "modules": [
+        "M03",
+        "M14"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S02",
+        "S08",
+        "S20"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "同一资产以明确身份和版本复用，跨项目引用有权限与来源，不能复制成无法关联的孤岛。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C12",
+      "title": "成果来源与必要资产集合体",
+      "goal": "G03",
+      "requirements": [
+        "R06"
+      ],
+      "modules": [
+        "M03",
+        "M08"
+      ],
+      "stage": "B1",
+      "scenarios": [
+        "S08"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "内容、证据、适用代码、数据、参数、环境、视觉修改及缺失依赖共同维护，可校验和移交。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C13",
+      "title": "真实文献检索与阅读",
+      "goal": "G03",
+      "requirements": [
+        "R07",
+        "R08",
+        "R21"
+      ],
+      "modules": [
+        "M15"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S15"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "按委托查找可访问文献和本地资料，保存检索范围、来源及实际阅读范围，生成有依据的内容而非模板。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C14",
+      "title": "引用库、去重和论断关联",
+      "goal": "G03",
+      "requirements": [
+        "R06",
+        "R08",
+        "R09"
+      ],
+      "modules": [
+        "M15",
+        "M08"
+      ],
+      "stage": "B5",
+      "scenarios": [
+        "S15",
+        "S06"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "文献身份去重，元数据和实际阅读内容可查；BibTeX／引用可导入导出，正文引用与支持关系可定位。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C15",
+      "title": "自然语言科研委托与产出路由",
+      "goal": "G02",
+      "requirements": [
+        "R01",
+        "R07"
+      ],
+      "modules": [
+        "M02",
+        "M05"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S03",
+        "S04"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "用户描述研究目的即可得到相关项目、范围和成果对象；无需先写工程任务包或手工选择多个后端。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C16",
+      "title": "文稿原位编辑与修订历史",
+      "goal": "G02",
+      "requirements": [
+        "R02"
+      ],
+      "modules": [
+        "M05",
+        "M06"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S04"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "报告与笔记支持正文编辑、批注、保存、比较和恢复；每次修订保持成果身份。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C17",
+      "title": "对象批注、并发与人工改动保留",
+      "goal": "G06",
+      "requirements": [
+        "R02",
+        "R03"
+      ],
+      "modules": [
+        "M05",
+        "M06"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S04"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "批注绑定对象和基线，Agent 与用户同时修改能合并或明确冲突；失去锚点不悄悄错配。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C18",
+      "title": "调研与分析报告的完整叙事",
+      "goal": "G03",
+      "requirements": [
+        "R08",
+        "R09"
+      ],
+      "modules": [
+        "M07",
+        "M08"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S03",
+        "S16"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "两类报告分别可生成和审阅，交代背景与逻辑演化、问题、方法、探索、证据、断言和限制。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C19",
+      "title": "研讨笔记与下一步判断",
+      "goal": "G03",
+      "requirements": [
+        "R01",
+        "R08"
+      ],
+      "modules": [
+        "M07",
+        "M05"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S03",
+        "S18"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "研讨保留起点、重要转折、共识、分歧与未决项，并据证据提出可理解的下一步建议。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C20",
+      "title": "科研统计图对象级编辑",
+      "goal": "G02",
+      "requirements": [
+        "R03",
+        "R21"
+      ],
+      "modules": [
+        "M05"
+      ],
+      "stage": "B3",
+      "scenarios": [
+        "S05"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "选中受支持的标题、轴、图例、曲线、标签等对象调整样式与位置；不是整图位图编辑。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C21",
+      "title": "视觉修改重放与代码保真",
+      "goal": "G02",
+      "requirements": [
+        "R03",
+        "R06"
+      ],
+      "modules": [
+        "M05",
+        "M08"
+      ],
+      "stage": "B3",
+      "scenarios": [
+        "S05",
+        "S08"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "重新运行源脚本后重放视觉修改，变化不兼容时定位冲突；科学数据不被视觉操作暗改。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C22",
+      "title": "子图组成主图与关联文字",
+      "goal": "G02",
+      "requirements": [
+        "R03",
+        "R09"
+      ],
+      "modules": [
+        "M05",
+        "M03"
+      ],
+      "stage": "B3",
+      "scenarios": [
+        "S05",
+        "S06"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "主图有子图、对齐、布局和图号；图注、方法及结果段落引用实际组件与证据。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C23",
+      "title": "综述概念图与研究流程图",
+      "goal": "G02",
+      "requirements": [
+        "R09"
+      ],
+      "modules": [
+        "M05"
+      ],
+      "stage": "B3",
+      "scenarios": [
+        "S17"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "Agent 生成可编辑结构图，用户可改节点、文本与关系；保留结构源并导出矢量图。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C24",
+      "title": "结构化内容组合与影响传播",
+      "goal": "G02",
+      "requirements": [
+        "R09",
+        "R10"
+      ],
+      "modules": [
+        "M03",
+        "M05"
+      ],
+      "stage": "B5",
+      "scenarios": [
+        "S06",
+        "S08"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "主题段落和图组件组成篇章；源组件变化列出受影响处，由用户或已授权策略选择接纳，不静默覆盖。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C25",
+      "title": "论文完整工作区",
+      "goal": "G02",
+      "requirements": [
+        "R09",
+        "R21"
+      ],
+      "modules": [
+        "M05",
+        "M15"
+      ],
+      "stage": "B5",
+      "scenarios": [
+        "S06"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "形成有来源的前言、方法、结果、讨论和引用；正文与图联动编辑，格式应用和实际编译导出有效。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C26",
+      "title": "海报完整工作区",
+      "goal": "G02",
+      "requirements": [
+        "R10"
+      ],
+      "modules": [
+        "M05"
+      ],
+      "stage": "B5",
+      "scenarios": [
+        "S06"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "实际尺寸下编辑文本、图与布局，支持对齐和可恢复修改；交付可编辑源与印刷 PDF。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C27",
+      "title": "PPT 与逐页讲稿工作区",
+      "goal": "G02",
+      "requirements": [
+        "R10"
+      ],
+      "modules": [
+        "M05"
+      ],
+      "stage": "B5",
+      "scenarios": [
+        "S06"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "逐页编辑和重排，讲稿关联对应页面；导出可编辑 PPTX、阅读 PDF 及逐页讲稿。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C28",
+      "title": "各类产出的真实导入导出",
+      "goal": "G02",
+      "requirements": [
+        "R01",
+        "R02",
+        "R09",
+        "R10"
+      ],
+      "modules": [
+        "M05",
+        "M10"
+      ],
+      "stage": "B5",
+      "scenarios": [
+        "S04",
+        "S05",
+        "S06",
+        "S08"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "按 09 支持表实际导出并重开检查，源内容与可编辑对象保留，不以改后缀或整页栅格化替代。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C29",
+      "title": "研究工坊共同运行与技术验收",
+      "goal": "G04",
+      "requirements": [
+        "R11"
+      ],
+      "modules": [
+        "M11"
+      ],
+      "stage": "B4",
+      "scenarios": [
+        "S07"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "独立模块处理输入、代码、配置、运行、预览、验证、输出和版本，并提供给学术任务可检查的依赖。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C30",
+      "title": "刺激准备任务",
+      "goal": "G04",
+      "requirements": [
+        "R11"
+      ],
+      "modules": [
+        "M11"
+      ],
+      "stage": "B4",
+      "scenarios": [
+        "S07"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "用真实授权素材完成受控刺激变换或组织、清单和预览；保留原材料及处理参数。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C31",
+      "title": "图像与标注清洗任务",
+      "goal": "G04",
+      "requirements": [
+        "R11"
+      ],
+      "modules": [
+        "M11"
+      ],
+      "stage": "B4",
+      "scenarios": [
+        "S07"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "实际检查／清洗图像和标注，展示更改与异常，输出可定位的数据和标注版本。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C32",
+      "title": "神经数据预处理任务",
+      "goal": "G04",
+      "requirements": [
+        "R11"
+      ],
+      "modules": [
+        "M11"
+      ],
+      "stage": "B4",
+      "scenarios": [
+        "S07"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "对真实授权小样本执行一种明确预处理，保留输入、配置、质量摘要和结果，原数据不被覆盖。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C33",
+      "title": "可视化工具开发任务",
+      "goal": "G04",
+      "requirements": [
+        "R11"
+      ],
+      "modules": [
+        "M11"
+      ],
+      "stage": "B4",
+      "scenarios": [
+        "S07"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "生成并真实运行一个可操作可视化工具，用实际输入交互测试并保留代码与环境。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C34",
+      "title": "实验软件开发任务",
+      "goal": "G04",
+      "requirements": [
+        "R11"
+      ],
+      "modules": [
+        "M11"
+      ],
+      "stage": "B4",
+      "scenarios": [
+        "S07"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "生成并运行有输入、试次推进和日志的实验软件；明确未验证硬件和精确时序，不以静态页面替代。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C35",
+      "title": "必要决策、权限与用户控制",
+      "goal": "G06",
+      "requirements": [
+        "R08",
+        "R12",
+        "R14"
+      ],
+      "modules": [
+        "M07",
+        "M14"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S18"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "必要决策先交代背景、选项和影响；可选讨论不阻塞；暂停／取消实际生效，不越权继续。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C36",
+      "title": "科学质量与独立交付审查",
+      "goal": "G03",
+      "requirements": [
+        "R08",
+        "R14"
+      ],
+      "modules": [
+        "M08"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S16",
+        "S24"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "核对来源、数字、证据支持和限制，发现不足会退回修订；工程通过不自动等于科学有效。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C37",
+      "title": "反馈原意与两类行动",
+      "goal": "G06",
+      "requirements": [
+        "R13"
+      ],
+      "modules": [
+        "M06",
+        "M09"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S09"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "用户原话、理解、候选和采用分开；当前成果修订和后续工作方式改进各有时机、结果与验证。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C38",
+      "title": "成长比较、外部学习与回退",
+      "goal": "G07",
+      "requirements": [
+        "R13"
+      ],
+      "modules": [
+        "M09"
+      ],
+      "stage": "B6",
+      "scenarios": [
+        "S09"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "从反馈、案例与外部方法提出候选，在后续真实相关任务比较，采用／撤回有证据，不只写反思。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C39",
+      "title": "安装、升级、迁移与恢复",
+      "goal": "G09",
+      "requirements": [
+        "R17",
+        "R20"
+      ],
+      "modules": [
+        "M10"
+      ],
+      "stage": "B6",
+      "scenarios": [
+        "S10",
+        "S19"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "干净环境可构建安装；真实研究空间升级与恢复后，成果、编辑、批注、引用和必要任务状态仍有效。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C40",
+      "title": "用户自有部署与数据控制",
+      "goal": "G08",
+      "requirements": [
+        "R19",
+        "R20"
+      ],
+      "modules": [
+        "M14"
+      ],
+      "stage": "B1",
+      "scenarios": [
+        "S20"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "无需产品中央账户运行；凭据受控，模型断连仍能管理本地资产；授权和网络行为可说明。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C41",
+      "title": "授权远程主机与执行依赖",
+      "goal": "G08",
+      "requirements": [
+        "R11",
+        "R20",
+        "R21"
+      ],
+      "modules": [
+        "M14",
+        "M11"
+      ],
+      "stage": "B4",
+      "scenarios": [
+        "S21"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "接入一台真实自有／授权主机完成任务，状态、取消和结果可返回同一研究空间，连接故障明确显示。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C42",
+      "title": "可安装与卸载的有用扩展",
+      "goal": "G09",
+      "requirements": [
+        "R17",
+        "R20"
+      ],
+      "modules": [
+        "M13"
+      ],
+      "stage": "B6",
+      "scenarios": [
+        "S22"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "不修改既有核心业务实现即可注册、发现、授权、调用和卸载实际科研扩展，并得到真实产出。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C43",
+      "title": "真实客户端与成果中心可用性",
+      "goal": "G10",
+      "requirements": [
+        "R01",
+        "R14"
+      ],
+      "modules": [
+        "M05",
+        "M10"
+      ],
+      "stage": "B6",
+      "scenarios": [
+        "S01",
+        "S23"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "用户在自己的客户端可完成委托、定位、阅读、修改、修订与导出；不以服务器截图签收。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C44",
+      "title": "开源发行与私有材料分离",
+      "goal": "G08",
+      "requirements": [
+        "R19",
+        "R20"
+      ],
+      "modules": [
+        "M10",
+        "M14"
+      ],
+      "stage": "B6",
+      "scenarios": [
+        "S10",
+        "S20"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "源代码与依赖许可可检查，发行物无密钥和私人研究资料；公开发布须有实际授权。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C45",
+      "title": "独立实例迁移与非锁定",
+      "goal": "G08",
+      "requirements": [
+        "R06",
+        "R17",
+        "R20"
+      ],
+      "modules": [
+        "M14",
+        "M10"
+      ],
+      "stage": "B6",
+      "scenarios": [
+        "S19",
+        "S20"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "研究空间可迁至另一用户自有实例并重新绑定提供者，核心资产不依赖旧服务或不可移交路径。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C46",
+      "title": "领域约定和产出能力可扩展",
+      "goal": "G09",
+      "requirements": [
+        "R04",
+        "R17"
+      ],
+      "modules": [
+        "M03",
+        "M13"
+      ],
+      "stage": "B6",
+      "scenarios": [
+        "S22"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "通用学术约定、项目领域配置和用户偏好分层；至少一个新导出／工具能力在旧项目有效且可撤销。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C47",
+      "title": "实际能力与部署状态透明",
+      "goal": "G10",
+      "requirements": [
+        "R14",
+        "R15",
+        "R16"
+      ],
+      "modules": [
+        "M01"
+      ],
+      "stage": "B1",
+      "scenarios": [
+        "S01",
+        "S11"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "入口可定位真实能力、未完成项、运行实现和证据；文档更新不自动改变实现或验收状态。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C48",
+      "title": "全类型整体验收",
+      "goal": "G10",
+      "requirements": [
+        "R15",
+        "R16",
+        "R17",
+        "R18"
+      ],
+      "modules": [
+        "M01",
+        "M08"
+      ],
+      "stage": "B6",
+      "scenarios": [
+        "S24"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "全量能力与场景及子场景无漏项；新仓库交付真实可运行完整软件，而非框架或任一单一示例。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C49",
+      "title": "预算、授权中止与无进展保护",
+      "goal": "G05",
+      "requirements": [
+        "R12",
+        "R18",
+        "R20"
+      ],
+      "modules": [
+        "M12",
+        "M14"
+      ],
+      "stage": "B1",
+      "scenarios": [
+        "S11",
+        "S12",
+        "S18"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "开发和科研运行分别遵守预算、认证和停止信号；退避和有限重试，避免无进展循环与越权接续。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    },
+    {
+      "id": "C50",
+      "title": "主动征求和中途接收反馈",
+      "goal": "G06",
+      "requirements": [
+        "R13"
+      ],
+      "modules": [
+        "M06",
+        "M07"
+      ],
+      "stage": "B2",
+      "scenarios": [
+        "S09",
+        "S18"
+      ],
+      "mandatory": true,
+      "minimum_behavior": "Agent 在关键成果和必要判断处主动征求反馈，中途意见可改变相关后续工作，不强制每一步审批。",
+      "acceptance_status": "待核验",
+      "evidence": []
+    }
+  ],
+  "overall_state": "开发文档已整理；软件实现、运行、用户验收均未由本包证明",
+  "completion_gate": "产品完成要求所有必交付项和子场景的工程实测、科学／用户确认均满足。工程就绪可仅保留真人确认或真实使用观察待验收，不可豁免模型、工具、主机等工程实测缺口；公开发布另需授权。",
+  "document_requirements": {
+    "R22": [
+      "README.md",
+      "00_五项检查结论.md"
+    ]
+  },
+  "verification_axes": [
+    "实现状态",
+    "工程实测状态",
+    "科学／用户确认状态"
+  ]
+}

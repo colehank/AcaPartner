@@ -1,0 +1,27 @@
+{
+  "name": "research-workbench",
+  "version": "0.2.0",
+  "description": "Read and explicitly edit the existing Research Partner workbench through bounded MCP tools.",
+  "author": {
+    "name": "Research Partner contributors"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Research Workbench",
+    "shortDescription": "Articles, chapter notes, scientific sources and revision rounds.",
+    "longDescription": "Connect Codex to an existing Research Partner HTTP service. Uses the service authorization and version checks. No embedded UI, automatic model loop, hidden installation or scientific approval.",
+    "developerName": "Research Partner contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Find my saved manuscripts and their source files.",
+      "Add a comment to a selected manuscript paragraph.",
+      "Show the exact proposed revision before I adopt it."
+    ]
+  }
+}

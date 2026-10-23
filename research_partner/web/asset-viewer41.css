@@ -1,0 +1,46 @@
+.asset41-viewer { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; color: #333c47; background: #fff; }
+.asset41-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 14px 16px 8px; border-bottom: 1px solid #e1e4e9; }
+.asset41-heading { min-width: 0; }
+.asset41-heading h2 { display: inline; margin: 0 0 0 8px; font: 600 15px/1.5 system-ui, sans-serif; overflow-wrap: anywhere; }
+.asset41-heading p { margin: 5px 0 0; color: #66707c; font: 12px/1.5 system-ui, sans-serif; overflow-wrap: anywhere; }
+.asset41-readonly { display: inline-block; padding: 2px 6px; border: 1px solid #d6dce4; border-radius: 4px; color: #55606e; font: 11px/1.5 system-ui, sans-serif; }
+.asset41-actions, .asset41-toolbar, .asset41-mode, .asset41-copy-tools, .asset41-pager, .asset41-pager-group { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.asset41-button { display: inline-flex; justify-content: center; align-items: center; min-height: 29px; padding: 4px 9px; border: 1px solid #d6dce4; border-radius: 4px; background: #fff; color: #3c4a5b; font: 12px/1.4 system-ui, sans-serif; text-decoration: none; cursor: pointer; }
+.asset41-button:hover { background: #f0f3f7; }
+.asset41-button[aria-pressed="true"] { background: #e7eef8; border-color: #99b2d7; color: #264f84; }
+.asset41-button:disabled { cursor: default; opacity: .4; }
+.asset41-button:focus-visible, .asset41-filter:focus-visible, .asset41-source:focus-visible { outline: 2px solid #5280bd; outline-offset: 2px; }
+.asset41-metadata { display: flex; align-items: baseline; flex-wrap: wrap; gap: 14px; padding: 7px 16px 0; color: #6b7480; font: 11px/1.5 system-ui, sans-serif; }
+.asset41-identity summary { cursor: pointer; }
+.asset41-identity code { display: block; max-width: 100%; margin-top: 5px; overflow-wrap: anywhere; }
+.asset41-toolbar { flex: none; padding: 10px 16px 4px; }
+.asset41-filter-label, .asset41-header-option { display: inline-flex; align-items: center; gap: 6px; margin: 0; color: #596576; font: 12px/1.4 system-ui, sans-serif; }
+.asset41-filter { width: 190px; min-height: 29px; padding: 4px 8px; border: 1px solid #d5dce5; border-radius: 4px; font: inherit; }
+.asset41-header-option input { margin: 0; }
+.asset41-count { margin: 5px 16px 0; color: #45566c; font: 12px/1.5 system-ui, sans-serif; }
+.asset41-table-note { margin: 4px 16px 8px; color: #75808e; font: 11px/1.5 system-ui, sans-serif; }
+.asset41-warning, .asset41-error { margin: 8px 16px; padding: 9px 11px; border-left: 3px solid #b9904d; background: #faf5e9; color: #715727; font: 12px/1.6 system-ui, sans-serif; overflow-wrap: anywhere; }
+.asset41-error { border-color: #b96363; background: #fcf0ef; color: #8b4040; }
+.asset41-status { min-width: 0; color: #657487; font: 11px/1.5 system-ui, sans-serif; overflow-wrap: anywhere; }
+.asset41-status:empty { display: none; }
+.asset41-viewport-frame { position: relative; flex: 1; min-width: 0; min-height: 140px; overflow: auto; margin-top: 6px; background: #f6f7f9; border-top: 1px solid #e3e7ec; border-bottom: 1px solid #e3e7ec; }
+.asset41-viewport-surface { min-width: 100%; min-height: 100%; width: max-content; }
+.asset41-content { min-width: 100%; }
+.asset41-source { width: max-content; min-width: 100%; margin: 0; padding: 14px 16px; border: 0; border-radius: 0; background: #fff; color: #27364a; font: 12px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre; overflow: visible; user-select: text; tab-size: 4; }
+.asset41-source code { font: inherit; white-space: inherit; }
+.asset41-table { width: max-content; min-width: 100%; border-collapse: collapse; background: #fff; color: #334255; font: 12px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.asset41-table th, .asset41-table td { min-width: 90px; max-width: 400px; padding: 7px 10px; border: 1px solid #e0e5ec; text-align: left; vertical-align: top; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* Sticky offsets are computed before the shared viewport scale and would drift
+   into the rows. Keep column headers in the table's own content coordinates. */
+.asset41-table thead th { position: static; background: #edf0f5; color: #4b5a6d; font-weight: 600; }
+.asset41-table .asset41-row-number { min-width: 52px; color: #7c8693; background: #f6f8fa; font-weight: 400; text-align: right; }
+.asset41-table .asset41-missing { color: #adb4bd; background: #f7f8fa; }
+.asset41-short-cell { border-bottom: 1px dotted #95a1b1; }
+.asset41-pager { flex: none; justify-content: space-between; gap: 10px; padding: 8px 16px; color: #667386; font: 11px/1.4 system-ui, sans-serif; }
+.asset41-image { display: block; max-width: none; height: auto; margin: 0; }
+.asset41-pdf { display: block; width: 100%; min-width: 340px; height: 68vh; min-height: 300px; border: 0; background: #e5e7ea; }
+.asset41-viewport-frame[data-asset41-view-kind="pdf"] .asset41-viewport-surface { width: 100%; }
+.asset41-pdf-help, .asset41-media-error { margin: 10px 16px; color: #667386; font: 12px/1.6 system-ui, sans-serif; }
+.asset41-empty { margin: 0; padding: 24px 16px; color: #737e8d; font: 13px/1.7 system-ui, sans-serif; }
+.asset41-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.asset41-viewer [hidden] { display: none !important; }

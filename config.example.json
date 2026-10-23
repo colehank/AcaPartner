@@ -1,0 +1,10 @@
+{
+  "workers": 2,
+  "default_provider": null,
+  "providers": {},
+  "import_roots": [],
+  "network": {"literature_enabled": true},
+  "rendering": {},
+  "clients": [],
+  "allowed_hosts": []
+}

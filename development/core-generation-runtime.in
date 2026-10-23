@@ -1,0 +1,6 @@
+# Product generation adapter. Installation requires explicit isolated-runtime authorization.
+# Official version checked 2026-10-10: https://pypi.org/project/snakemake/
+snakemake==9.27.0
+# Locked build requirements for the source-only connection-pool dependency.
+setuptools==84.0.0
+wheel==0.48.0

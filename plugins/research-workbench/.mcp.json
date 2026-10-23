@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "research_workbench": {
+      "command": "python3",
+      "args": [
+        "./scripts/mcp_workbench.py"
+      ],
+      "cwd": ".",
+      "env_vars": [
+        "RP_WORKBENCH_URL",
+        "RP_WORKBENCH_TOKEN_FILE",
+        "PATH"
+      ],
+      "startup_timeout_sec": 10,
+      "tool_timeout_sec": 120
+    }
+  }
+}

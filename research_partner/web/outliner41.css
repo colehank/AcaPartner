@@ -1,0 +1,45 @@
+.outliner41 { display:flex; flex-direction:column; min-width:0; min-height:0; height:100%; color:var(--ink,#27312c); font-size:12px; }
+.outliner41-search { display:flex; align-items:center; position:relative; margin:8px 8px 6px; }
+.outliner41-query { box-sizing:border-box; width:100%; min-width:0; height:30px; padding:5px 29px 5px 9px; border:1px solid var(--line,#d6dcd6); border-radius:5px; background:var(--paper,#fff); color:inherit; font:inherit; }
+.outliner41-query:focus-visible { outline:2px solid var(--accent,#4e7865); outline-offset:1px; }
+.outliner41-clear { position:absolute; inset-inline-end:4px; width:24px; height:24px; padding:0; border:0; border-radius:3px; background:transparent; color:inherit; font-size:18px; cursor:pointer; }
+.outliner41-clear[hidden] { display:none; }
+.outliner41-tree, .outliner41-children { list-style:none; padding:0; margin:0; }
+.outliner41-tree { flex:1; min-height:0; overflow:auto; padding:2px 4px 8px; overscroll-behavior:contain; }
+.outliner41-children { padding-inline-start:13px; }
+.outliner41-item { min-width:0; padding:0; margin:0; outline:none; }
+.outliner41-row { display:flex; align-items:center; gap:4px; min-width:0; min-height:27px; box-sizing:border-box; padding:3px 5px 3px 2px; border-radius:3px; cursor:default; user-select:none; }
+.outliner41-row:hover { background:var(--wash,#edf0ea); }
+.outliner41-selected { background:var(--outliner41-selection,#dfeae3); color:var(--outliner41-selection-ink,#153d2c); }
+.outliner41-selected:hover { background:var(--outliner41-selection,#dfeae3); }
+.outliner41-item:focus-visible > .outliner41-row { outline:2px solid var(--accent,#4e7865); outline-offset:-2px; }
+.outliner41-toggle { flex:0 0 17px; width:17px; height:20px; padding:0; border:0; border-radius:2px; background:transparent; color:inherit; font:inherit; cursor:pointer; }
+.outliner41-toggle:hover { background:rgba(0,0,0,.07); }
+.outliner41-leaf { visibility:hidden; }
+.outliner41-icon { flex:0 0 15px; text-align:center; opacity:.72; font-size:13px; }
+.outliner41-title { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.4; }
+.outliner41-status { flex:0 1 auto; max-width:45%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; opacity:.74; }
+.outliner41-empty { margin:10px 13px; line-height:1.6; color:var(--muted,#637067); }
+.outliner41-detail { flex:0 0 auto; padding:7px 10px; border-top:1px solid var(--line,#d6dcd6); font-size:11px; line-height:1.5; min-height:17px; max-height:100px; overflow:auto; overflow-wrap:anywhere; white-space:pre-wrap; color:var(--muted,#637067); }
+
+/* Keep the standalone light palette; the actual work desk supplies a dark shell. */
+.desk41 .outliner41 { --ink:#bdc8d8; --muted:#8795aa; --line:#3f4754; --paper:#252930; --wash:#39424f; --accent:#829cc3; --outliner41-selection:#40536e; --outliner41-selection-ink:#e3edfc; color:#bdc8d8; background:transparent; color-scheme:dark; font-size:11px; }
+.desk41 .outliner41-search { margin:8px 6px 6px; }
+.desk41 .outliner41-query { height:27px; min-height:0; padding:4px 27px 4px 8px; border-color:#414a58; border-radius:4px; background:#252930; color:#bdc8d8; font-size:11px; }
+.desk41 .outliner41-query::placeholder { color:#8795aa; opacity:1; }
+.desk41 .outliner41-clear { color:#a8b6cb; height:22px; width:22px; font-size:16px; }
+.desk41 .outliner41-tree { min-width:0; padding:2px 2px 7px; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:#536074 transparent; }
+.desk41 .outliner41-children { margin-inline-start:8px; padding-inline-start:6px; border-inline-start:1px solid #8795aa26; }
+.desk41 .outliner41-row { height:25px; min-height:25px; gap:3px; padding:2px 4px 2px 1px; }
+.desk41 .outliner41-toggle { width:15px; height:19px; flex-basis:15px; color:#96a6bc; font-size:11px; }
+.desk41 .outliner41-toggle:hover { background:#ffffff0d; color:#d7e1ee; }
+.desk41 .outliner41-icon { flex-basis:13px; color:#94a5be; opacity:1; font-size:11px; }
+.desk41 .outliner41-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; line-height:19px; }
+.desk41 .outliner41-status { max-width:40%; color:#8795aa; opacity:1; font-size:10px; }
+.desk41 .outliner41-selected .outliner41-status, .desk41 .outliner41-selected .outliner41-icon, .desk41 .outliner41-selected .outliner41-toggle { color:#c4d4eb; }
+.desk41 .outliner41-detail { max-height:74px; padding:6px 8px; border-color:#3f4754; color:#8795aa; font-size:10px; }
+.desk41 .outliner41-empty { margin:9px 10px; color:#8795aa; font-size:11px; }
+@media (forced-colors:active) {
+  .outliner41-selected { outline:1px solid Highlight; }
+  .outliner41-item:focus-visible > .outliner41-row { outline:2px solid Highlight; }
+}

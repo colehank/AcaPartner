@@ -1,0 +1,22 @@
+{
+  "id": "source-reference-index",
+  "name": "来源引用定位清单",
+  "description": "只读展开指定对象修订中的显式来源引用，输出逐字片段、定位和输入哈希；不评判科学支持。",
+  "license": "MIT",
+  "version": "1.1.0",
+  "api_version": 1,
+  "entrypoint": "main.py",
+  "permissions": [
+    "execute_code",
+    "read_inputs",
+    "write_outputs"
+  ],
+  "operations": [
+    "export_index"
+  ],
+  "files": {
+    "main.py": {
+      "sha256": "1071b23743ceffc03ce2f2fdb02b3261e5b4cdb018a2b886cb9a81ef1e6b387d"
+    }
+  }
+}

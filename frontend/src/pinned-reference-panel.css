@@ -1,0 +1,29 @@
+.pinned-reference-panel{margin:16px 0;padding:18px;border:1px solid #cbd5df;border-radius:6px;background:#fff;color:#172638}
+.pinned-reference-heading{display:flex;align-items:center;gap:12px}.pinned-reference-heading h2{flex:1;font-size:1.15rem;margin:0 0 8px}
+.pinned-reference-panel>p{max-width:76ch;color:#46566a}.pinned-reference-panel small,.pinned-reference-panel code{display:block;overflow-wrap:anywhere;margin:6px 0;color:#485a71}.pinned-reference-panel code{font-size:.8rem}
+.pinned-reference-panel button{margin:5px 8px 8px 0}.pinned-reference-blocks article{margin:12px 0;padding:12px;border:1px solid #d2dce6;border-radius:4px;background:#f8fafc}
+.pinned-reference-blocks .pinned-reference-target{border:2px solid #4676ac;background:#eff5ff}.pinned-reference-panel pre{font:inherit;font-size:.95rem;white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;max-height:480px;overflow:auto}
+.pinned-reference-panel mark{color:#172638;background:#ffe4a1;padding:1px 0}.pinned-reference-panel details{margin-top:16px}.pinned-reference-panel summary{cursor:pointer;font-weight:600}
+.pinned-reference-panel [role=alert]{color:#8d2720}.pinned-reference-panel [role=status]{font-size:.9rem;color:#40576d}
+
+/* Report prose stays in one reading flow; other fixed source kinds keep their
+   original inspector presentation. No editor/global typography is changed. */
+.pinned-reference-panel--report{margin:0;padding:0;border:0;border-radius:0;min-width:0}
+.pinned-reference-panel--report .pinned-report-toolbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 16px;border-bottom:1px solid #d2dce6;background:#fff}
+.pinned-reference-panel--report .pinned-report-toolbar strong{flex:1 1 auto;font-size:.9rem;color:#40576d}
+.pinned-reference-panel--report .pinned-report-toolbar button{margin:0}
+.pinned-reference-panel--report .pinned-report-reading{max-width:76ch;margin:0 auto;padding:20px 22px 32px;min-width:0;line-height:1.7}
+.pinned-reference-panel--report .pinned-report-reading>h2{margin:0 0 12px;font-size:1.3rem;line-height:1.45;overflow-wrap:anywhere}
+.pinned-reference-panel--report .pinned-report-boundary{margin:0 0 22px;font-size:.85rem;color:#526477;line-height:1.5}
+.pinned-reference-panel--report .pinned-report-block{margin:0;padding:0;border:0;background:none;max-height:none;overflow:visible;scroll-margin-top:110px}
+.pinned-reference-panel--report [data-report-text]{margin:0 0 1.1em;min-height:1em;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.pinned-reference-panel--report .pinned-reference-target{outline:1px solid #a9bfd9;outline-offset:5px}
+.pinned-reference-panel--report mark{scroll-margin-top:110px}
+.report-revision-entry{padding:8px 16px;border-bottom:1px solid #d2dce6;background:#f7fafc}
+.report-revision-form{max-width:76ch;margin:8px auto 16px}.report-revision-form h3{font-size:1.05rem;margin:12px 0}
+.report-revision-form p{line-height:1.55}.report-revision-form label{display:block;margin:10px 0;overflow-wrap:anywhere}
+.report-revision-form textarea{display:block;box-sizing:border-box;width:100%;min-height:110px;padding:8px;font:inherit;resize:vertical}
+.report-revision-form select,.report-revision-form input[type=number]{margin:4px 8px;max-width:100%;padding:5px}
+.report-revision-form input[type=checkbox]{margin-right:7px}.report-revision-form small{font-size:.8rem}
+.report-revision-form [aria-label="修订保存来源"]{padding:10px;border:1px solid #cbd5df;background:#fff}
+.pinned-reference-panel--report .pinned-report-field,.pinned-reference-panel--report .pinned-report-identity{margin-top:20px;font-size:.9rem}

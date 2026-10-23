@@ -1,0 +1,6 @@
+.figure-opinion-control{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:8px;background:#ecece6;border-bottom:1px solid #c5cece}
+.figure-opinion-control label{display:flex;flex-direction:column;gap:4px;min-width:0}
+/* The Artist multi-select stays tall; this is a single native occurrence choice. */
+.figure-properties .figure-opinion-control select{width:100%;max-width:100%;min-width:0;height:auto;min-height:32px;font:inherit}
+.figure-opinion-control button{align-self:flex-start;max-width:100%}
+.figure-opinion-control small{line-height:1.5;overflow-wrap:anywhere}

@@ -1,0 +1,10 @@
+.native-review-context{margin:18px 0;padding:16px;border:1px solid #cbd5df;border-radius:6px;background:#fff;color:#172638;overflow-wrap:anywhere}
+.native-review-context h3{font-size:1.05rem;margin:0 0 10px}.native-review-context>p{max-width:76ch;color:#46566a}
+.native-review-context label{display:block;margin:12px 0 6px;font-weight:600}.native-review-context input,.native-review-context textarea{display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:8px;font:inherit;font-weight:400;border:1px solid #afbcca;border-radius:4px;color:inherit;background:#fff}
+.native-review-context textarea{min-height:150px;max-height:360px;resize:vertical;white-space:pre-wrap;background:#f3f6f9}
+.native-review-context small,.native-review-context code{display:block;overflow-wrap:anywhere;margin:5px 0;color:#485a71}.native-review-context code{font-size:.8rem}
+.native-context-selected article,.native-context-preview{margin:12px 0;padding:12px;border:1px solid #d2dce6;border-radius:4px;background:#f8fafc}
+.native-context-selected article>p{margin:8px 0}.native-context-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.native-context-actions button{margin:0}
+.native-context-source,.native-context-limits{margin-top:10px;color:#46566a;font-size:.9rem}.native-review-context summary{cursor:pointer;width:fit-content;max-width:100%;padding:3px 0;color:#264e76}.native-review-context summary:focus-visible{outline:2px solid #2772b5;outline-offset:3px;border-radius:2px}
+.native-context-source dl{margin:10px 0 0;padding-top:6px;border-top:1px solid #d2dce6}.native-context-source dt{margin-top:8px;font-size:.85em;color:#53677c}.native-context-source dd{margin:2px 0 0;user-select:text}.native-context-source code{user-select:text;white-space:normal}
+.native-review-context button{margin:4px 8px 4px 0}.native-review-context [role=alert]{color:#8d2720}.native-review-context [role=status]{font-size:.9rem;color:#40576d}

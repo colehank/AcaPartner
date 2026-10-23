@@ -1,0 +1,24 @@
+.research-graph-panel {height:100%;overflow:auto;box-sizing:border-box;padding:18px 22px;color:var(--ink,#263b37);background:var(--paper,#fbfaf5);}
+.research-graph-panel h2 {margin:18px 0 8px;}
+.research-graph-panel p {line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;}
+.research-graph-panel small {display:block;overflow-wrap:anywhere;line-height:1.5;}
+.research-graph-boundary,.research-graph-empty {padding:12px 15px;border-left:3px solid #718c85;background:#eef2ec;}
+.research-graph-canvas {overflow:auto;margin:16px 0 12px;border:1px solid #cdd7cc;border-radius:8px;background:#f5f7f0;}
+.research-graph-canvas svg {display:block;max-width:none;}
+.research-graph-canvas .quiet {margin:0;padding:10px 14px;}
+.research-graph-node rect {fill:#fffef8;stroke:#91a69c;}
+.research-graph-node text {fill:#30443c;font-size:12px;}
+.research-graph-node text:nth-of-type(2) {font-size:15px;font-weight:600;}
+.research-graph-node text:nth-of-type(3) {fill:#64746b;font-size:10px;}
+.research-graph-edge path {fill:none;stroke:#587469;stroke-width:1.5;}
+.research-graph-edge.candidate path {stroke-dasharray:6 4;stroke:#978868;}
+.research-graph-edge text {font-size:12px;fill:#3b5147;paint-order:stroke;stroke:#f5f7f0;stroke-width:4px;stroke-linejoin:round;}
+.research-graph-canvas marker path {fill:#587469;}
+.research-graph-objects {display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:12px;margin:18px 0;}
+.research-graph-objects article,.research-graph-relation,.research-graph-proposal article {padding:14px;border:1px solid #d8ded3;border-radius:7px;margin-bottom:12px;background:#fffef9;}
+.research-graph-objects h3,.research-graph-relation h4,.research-graph-proposal h4 {margin:0 0 10px;overflow-wrap:anywhere;}
+.research-graph-references {margin:8px 0;padding-left:22px;}
+.research-graph-references li {margin:7px 0;overflow-wrap:anywhere;}
+.research-graph-panel button {white-space:normal;}
+.research-graph-panel pre {max-height:330px;overflow:auto;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;}
+.research-graph-proposal {border-top:2px solid #a3b8a6;margin-top:20px;padding-top:12px;}
