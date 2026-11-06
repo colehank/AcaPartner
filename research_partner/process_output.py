@@ -75,8 +75,9 @@ class BoundedTextCapture(io.TextIOBase):
         self.budget = budget
         self.stream = stream
 
+    # TextIOBase 在运行时将 encoding 暴露为只读属性。
     @property
-    def encoding(self) -> str:
+    def encoding(self) -> str:  # type: ignore[override]
         return "utf-8"
 
     def writable(self) -> bool:
@@ -214,9 +215,9 @@ def capture_process(
             if not group_stopped and (failure is not None or process.poll() is None):
                 _kill_group(process)
         finally:
-            for stream in (process.stdout, process.stderr):
-                if stream is not None:
-                    stream.close()
+            for cleanup_stream in (process.stdout, process.stderr):
+                if cleanup_stream is not None:
+                    cleanup_stream.close()
             if process.poll() is None:
                 process.kill()
             process.wait(timeout=1)

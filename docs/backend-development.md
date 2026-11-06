@@ -12,7 +12,7 @@ python3.12 -m venv /tmp/acapartner-backend-dev
 python -m pip install -e '.[dev]'
 ```
 
-默认 `dependencies = []` 保持不变；`dev` 可选依赖仅安装固定版本 `ruff==0.14.14`。测试使用标准库 `unittest`，不需要 pytest、Node.js、模型 SDK、真实账号或 API 密钥。
+默认 `dependencies = []` 保持不变；`dev` 可选依赖固定为 `ruff==0.14.14` 和 `mypy==1.18.2`。测试使用标准库 `unittest`，不需要 pytest、Node.js、模型 SDK、真实账号或 API 密钥。
 
 ## 标准测试入口
 
@@ -42,7 +42,14 @@ Ruff 的目标版本是 `py312`，基础规则配置为 `E4`、`E7`、`E9`、`F`
 python -m ruff check --select E9,F63,F7,F82 research_partner tools tests
 ```
 
-已纳管模块执行完整基础规则；其精确清单维护在 `.github/workflows/backend.yml` 的 `Check maintained backend modules` 步骤中。修改或新增后端模块时，先对相关文件运行：
+完整质量入口如下，CI 与本地共用相同的纳管清单和命令：
+
+```sh
+python tools/check_backend.py all
+# 也可以分别执行 lint、format、types、test。
+```
+
+已纳管模块执行完整基础规则及格式门禁；精确清单在 `tools/check_backend.py` 的 `MAINTAINED_MODULES`。范围包括应用、Store、HTTP、渲染和 provider 主模块、全部本轮新增边界模块及测试，不扩展到所有历史领域文件。`TYPED_BOUNDARIES` 列出七个纯边界模块，使用 mypy 检查；`--follow-imports=skip` 明确不宣称历史动态业务代码已全部类型化。修改或新增后端模块时，先对相关文件运行：
 
 ```sh
 python -m ruff check path/to/changed.py
@@ -67,9 +74,43 @@ python -m ruff format --check path/to/changed.py
 - 公共分发没有 `tools.codex_thread_dispatch` 私有适配器，因此实验性 `app_server_dynamic` 路线明确不可用。状态查询将其标为不可用，图形任务配置预检和执行入口明确拒绝；普通任务仍可排队，但执行前会在预算预留之前停止，不启动模型、不自动回退到 CLI。已保存的回执核查逻辑保留。普通 Codex CLI 路线不受此限制。
 - 渲染子进程的 stdout/stderr 共享默认 **4 MiB** 输出预算，每路仅保留 **12,000 bytes** 尾部；达到预算即失败。worker 的 Python 输出捕获使用同样预算，父进程另外限制绕过 Python 重定向的原始输出。超时、输出限额、非零退出和退出后管道仍被后代持有分别报告，清理不无限等待后代关闭管道。该机制不是恶意代码隔离沙箱，也不限制任意内存分配或后台文件写入。
 
-本轮只建立上述清晰边界，不整体拆分 App/Store，不迁移 HTTP 框架、数据库层或科学运行时。剩余大型领域处理器和历史格式债应按模块补测试后逐步收敛，避免把风格变更与权限、事务规则的大规模重写混在一起。
+## 领域边界与兼容性
 
-## 个人配置不进入 PR
+### 应用命令
+
+`App.dispatch()` 继续是 GUI、CLI 和代理的共同入口，负责命令信封与提交后文件结果收集。`command_routing.py` 维护有序、惰性加载的路由，并保留两个鉴权阶段：专用领域先验证其项目/任务/租约；普通命令先执行公共写作用域检查，再交给领域处理器。精确路由必须先于对应前缀回退，例如稿件恢复、格式渲染、外部反馈和文献全文入口。不要将路由按字母排序或提前统一查询所有 `id`。
+
+核心命令从 `_dispatch()` 中迁移到五个内聚模块：
+
+- `command_objects.py`：项目初始化、置顶及对象创建、保存、恢复、归档。
+- `command_reviews.py`：批注、审阅记录与依赖采用；批注更新通过 Store 的公开 API 持久化。
+- `command_assets.py`：资产检查/导入、脚本授权及成果导出。
+- `command_tasks.py`：已有任务提交和明确控制，保留预算、租约与候选修订的原有规则。
+- `command_workspace.py`：周期、文献、扩展、设置与备份的领域协调。
+
+`action_contract.COMMAND_FIELDS` 为本次迁移的核心命令提供必填字段与基本类型校验，未知扩展字段不被裁剪。其他专门领域仍在自己的入口执行细化校验。来源、修订、权限和科学有效性不能仅用字段类型推导。
+
+### 事务内存储策略
+
+`object_policies.py` 通过公开的 `ObjectPolicyStore` Protocol 读取对象与引用，承载文章准备边界、稿件格式、图形布局、成员快照和稿件来源特性策略。`Store.create()` / `save()` 在原写事务、原写入前位置调用统一策略清单；策略复用传入的连接，不新开连接或在事务外预检后直接写入。已有的 Store 校验方法保留兼容代理。
+
+资产归属清理、SQLite 提交/回滚、修订三方合并、任务执行租约和提交后文件同步仍由 Store 管理，不随领域拆分搬离原事务。`Store.update_annotation()` 将批注更新与其事件放在同一事务，必须同时匹配批注和对象身份。
+
+### 数据与协议
+
+`contracts.py` 描述研究对象、任务载荷/状态/结果、权限上下文及核心请求类型，并用于 App、Store、HTTP 的公开边界注解。开放的正文、元数据和领域结果保留 JSON 扩展字段；这些 TypedDict 不是完整的业务 schema，也不自动执行运行时校验。
+
+`http_boundary.py` 只拥有请求体校验和安全响应编码，不拥有凭据、会话和业务路由。无效长度、短请求体、非法 UTF-8/JSON 和非对象 JSON 返回受控参数错误，不回显原始请求。Origin、跨站、CSRF、媒体类型和长度检查顺序保留。
+
+`render_contract.py` 独立于 App、Store 和科学库，定义 worker 请求、成功/失败结果及进程记录。父进程和 worker 都校验公共信封，非法操作或字段返回 `invalid`；正常渲染器内的业务异常保持其原有错误类型。直接脚本启动和便携 runtime 均包含此辅助模块。
+
+### 四阶段验收范围
+
+第一阶段建立可重复测试和跨平台门禁；第二阶段修复已确认的入口、依赖、输出与诊断问题；第三阶段完成上述纳管模块的分批风格治理；第四阶段完成应用路由、对象策略、HTTP/渲染边界和公共数据契约的职责拆分。纯格式化使用独立提交，并核对 AST 等价；领域处理器初始迁移也逐项核对业务 AST。
+
+本轮不更换框架、数据库格式或科学运行时，不把所有历史领域模块一次性搬家，也不宣称已经完成全库静态类型化或真实科学/模型环境验收。后续业务模块按相同的测试、评审与增量纳管流程继续维护。
+
+## 个人配置不进入提交
 
 个人工具配置、图谱索引与缓存只写入本地 `.git/info/exclude` 的精确路径，不为个人环境修改共享 `.gitignore`，也不提交 `.claude/settings.local.json`、真实配置、令牌、账号文件或工作区数据库。不要使用会掩盖团队配置的整个目录通配忽略规则。
 

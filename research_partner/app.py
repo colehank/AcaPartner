@@ -14,34 +14,16 @@ import shutil
 import sqlite3
 import stat
 import tempfile
-import urllib.parse
-import urllib.request
 import zipfile
 from pathlib import Path
 from .store import Store, Problem, require, now, uid, digest, encoded
 from .source_identity import IDENTITY_SCOPE, source_files
 from .action_contract import validate_action_request
+from .command_objects import KINDS as KINDS, default_content as default_content
+from .contracts import JsonObject, Principal, ResearchObject, Scope, TaskRecord
 
 
 ROOT = Path(__file__).resolve().parent.parent
-KINDS = {
-    "report",
-    "note",
-    "paper",
-    "figure",
-    "diagram",
-    "poster",
-    "slides",
-    "workshop",
-    "workshop_note",
-    "concept",
-    "question",
-    "literature",
-    "commission",
-    "growth",
-    "dataset",
-    "recipe",
-}
 
 
 def implementation():
@@ -52,36 +34,6 @@ def implementation():
         "version": "0.1.0.dev0",
         "identity_scope": IDENTITY_SCOPE,
     }
-
-
-def default_content(kind):
-    if kind in {"report", "note", "paper", "commission"}:
-        return {
-            "blocks": [{"id": uid("BLOCK"), "kind": "paragraph", "text": ""}],
-            "citations": [],
-        }
-    if kind == "diagram":
-        return {"nodes": [], "edges": []}
-    if kind in {"poster", "slides"}:
-        return {
-            "units": "cm",
-            "pages": [
-                {
-                    "id": uid("PAGE"),
-                    "width": 80 if kind == "poster" else 33.867,
-                    "height": 120 if kind == "poster" else 19.05,
-                    "objects": [],
-                    "notes": "",
-                }
-            ],
-        }
-    if kind == "figure":
-        return {
-            "input_assets": {},
-            "overlays": [],
-            "spec": {"kind": "line", "x": [], "series": []},
-        }
-    return {}
 
 
 class App:
@@ -102,7 +54,9 @@ class App:
             self._verify_development_source
         )
 
-    def access(self, obj, scope=None, *, _receipt_seen=None):
+    def access(
+        self, obj: ResearchObject, scope: Scope = None, *, _receipt_seen=None
+    ) -> ResearchObject:
         if scope is not None:
             project = obj["id"] if obj["kind"] == "project" else obj.get("project_id")
             require(
@@ -118,7 +72,9 @@ class App:
             require_read_access(self, obj, scope, seen=_receipt_seen)
         return obj
 
-    def get(self, ident, scope=None, revision=None):
+    def get(
+        self, ident: str, scope: Scope = None, revision: int | None = None
+    ) -> ResearchObject:
         current = self.access(self.store.get(ident), scope)
         if revision is None:
             from .figure_definition import FigureDefinitions, is_definition
@@ -127,7 +83,7 @@ class App:
                 current = FigureDefinitions(self.store).sync(ident)
         return self.store.get(ident, revision) if revision is not None else current
 
-    def writable(self, ident, scope=None):
+    def writable(self, ident: str, scope: Scope = None) -> ResearchObject:
         obj = self.get(ident, scope)
         project = obj["id"] if obj["kind"] == "project" else obj["project_id"]
         require(
@@ -313,13 +269,15 @@ class App:
             "canonical_source_sha256": digest(obj),
         }
 
-    def _relation_allowed(self, relation, scope):
+    def relation_allowed(self, relation, scope):
         try:
             self.get(relation["src"], scope)
             self.get(relation["dst"], scope)
             return True
         except Problem:
             return False
+
+    _relation_allowed = relation_allowed
 
     def _verify_source(self):
         current = implementation()
@@ -602,7 +560,9 @@ class App:
             "client_verified": False,
         }
 
-    def dispatch(self, data, scope=None, *, principal=None):
+    def dispatch(
+        self, data: object, scope: Scope = None, *, principal: Principal | None = None
+    ) -> object:
         with self.store.capture_file_results() as files:
             result = self._dispatch(data, scope, principal=principal)
         repairs = {
@@ -614,796 +574,12 @@ class App:
             result = {**result, "project_files": repairs}
         return result
 
-    def _dispatch(self, data, scope=None, *, principal=None):
-        data = validate_action_request(data)
-        action = data["action"]
-        if isinstance(action, str) and action.startswith("claim."):
-            from .claims import dispatch
+    def _dispatch(
+        self, data: object, scope: Scope = None, *, principal: Principal | None = None
+    ) -> object:
+        from .command_routing import dispatch_command
 
-            return dispatch(self, data, scope, principal)
-        if isinstance(action, str) and action.startswith(
-            ("dataset.", "recipe.", "build.")
-        ):
-            from .generation import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if isinstance(action, str) and action.startswith(("desk.", "notes.")):
-            from .desk_w1a import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if action == "system.verify":
-            return self.verify_state(scope)
-        s = self.store
-        if action in {"figure.visual.commit", "figure.visual.receipt"}:
-            from .figure_commit41 import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if action == "figure.preview":
-            from .figure_preview40 import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if action in {"manuscript.format.render", "manuscript.format.source"}:
-            from .manuscript_layout40 import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if isinstance(action, str) and action.startswith(
-            ("manuscript.format.", "manuscript.edit.")
-        ):
-            from .manuscript_format40 import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if action == "manuscript.render":
-            from .manuscript_render import dispatch
-
-            return dispatch(self, data, scope)
-        if action == "trace.inspect":
-            from .scientific_trace import inspect
-
-            return inspect(self, data, scope)
-        if isinstance(action, str) and action.startswith("article."):
-            from .article_workspace import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if isinstance(action, str) and action.startswith("workbench."):
-            from .workbench import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if action in {
-            "manuscript.revision.recover_preview",
-            "manuscript.revision.recover",
-        }:
-            from .manuscript_recovery39 import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if action in {
-            "task.recover_cli_checkpoint_preview",
-            "task.recover_cli_checkpoint",
-        }:
-            from .codex_checkpoint_registration import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if isinstance(action, str) and action.startswith("manuscript.revision."):
-            from .manuscript_revision import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if isinstance(action, str) and action.startswith("project.management."):
-            from .project_management import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if (
-            scope is not None
-            and action not in {"project.create"}
-            and not (isinstance(action, str) and action.startswith("graph."))
-        ):
-            # Shared components grant evidence reading, never mutation rights.
-            if data.get("project_id"):
-                self.writable(data["project_id"], scope)
-            if data.get("object_id"):
-                self.writable(data["object_id"], scope)
-            if data.get("src"):
-                self.writable(data["src"], scope)
-            if data.get("source_id"):
-                self.writable(data["source_id"], scope)
-            if data.get("target_id"):
-                self.writable(data["target_id"], scope)
-            if (
-                data.get("id")
-                and action
-                not in {
-                    "cycle.revise_failed_child_preview",
-                    "cycle.revise_failed_child",
-                    "task.control",
-                    "task.guide",
-                    "task.revise_candidate",
-                    "task.extend_budget",
-                    "task.recover_candidate",
-                    "task.recover_candidate_preview",
-                    "task.recover_stopped_candidate",
-                    "task.recover_stopped_candidate_preview",
-                    "cycle.view",
-                    "cycle.control",
-                    "cycle.stage_revision_preview",
-                    "cycle.stage_revision",
-                    "cycle.stage_final_revision_preview",
-                    "cycle.stage_final_revision",
-                    "annotation.update",
-                    "dependency.accept",
-                    "dependency.retain",
-                    "question.candidate_preview",
-                }
-                and not action.startswith(("extension.", "graph."))
-            ):
-                self.writable(data["id"], scope)
-        if action in {"cycle.revise_failed_child_preview", "cycle.revise_failed_child"}:
-            from .cycle_child_revision import dispatch
-
-            return dispatch(self, data, scope)
-        if action in {
-            "cycle.stage_final_revision_preview",
-            "cycle.stage_final_revision",
-        }:
-            from .cycle_final_handoff import dispatch
-
-            return dispatch(self, data, scope)
-        if action in {"cycle.stage_revision_preview", "cycle.stage_revision"}:
-            from .cycle_handoff import dispatch
-
-            return dispatch(self, data, scope)
-        if action in {"task.recover_candidate", "task.recover_candidate_preview"}:
-            from .native_recovery import dispatch
-
-            return dispatch(self, data, scope)
-        if action == "project.create":
-            require(scope is None, "受限客户端不能创建项目", "forbidden", 403)
-            from .article_workspace import initialize_output
-
-            with s.transaction() as connection:
-                project = s.create(
-                    "project",
-                    data["title"],
-                    content=data.get("content", {}),
-                    metadata=data.get("metadata", {}),
-                    connection=connection,
-                )
-                result = initialize_output(s, connection, project)
-            return {
-                **result["project"],
-                "primary_manuscript_id": result["manuscript"]["id"],
-            }
-        if action in {"cycle.submit", "cycle.view", "cycle.control"}:
-            from . import cycle
-
-            if action == "cycle.submit":
-                return cycle.create(self, data, scope)
-            if action == "cycle.view":
-                return cycle.view(self, data["id"], scope)
-            return cycle.control(self, data["id"], data["operation"], scope)
-        if action == "project.feature":
-            project = self.writable(data["project_id"], scope)
-            require(project["kind"] == "project", "需要所属项目")
-            obj = self.get(data["object_id"], scope)
-            require(
-                obj["project_id"] == project["id"]
-                and obj["kind"]
-                in {
-                    "report",
-                    "note",
-                    "paper",
-                    "figure",
-                    "diagram",
-                    "poster",
-                    "slides",
-                    "workshop",
-                    "commission",
-                }
-                and not obj["archived"],
-                "请选择本项目未归档成果",
-            )
-            require(type(data.get("featured")) is bool, "需要明确置顶或取消置顶")
-            ids = list(dict.fromkeys(project["metadata"].get("featured_objects", [])))
-            if data["featured"] and obj["id"] not in ids:
-                ids.append(obj["id"])
-            if not data["featured"]:
-                ids = [x for x in ids if x != obj["id"]]
-            require(len(ids) <= 12, "重点成果最多12项；其他成果仍可在工作台打开")
-            return s.save(
-                project["id"],
-                data["expected_revision"],
-                metadata={**project["metadata"], "featured_objects": ids},
-                reason="explicit project highlight selection",
-                merge=False,
-            )
-        if action == "workshop.accept":
-            obj = self.writable(data["id"], scope)
-            require(obj["kind"] == "workshop", "需要工坊产物")
-            records = obj["content"].get("acceptance", [])
-            records = records if isinstance(records, list) else [records]
-            content = {
-                **obj["content"],
-                "acceptance": [
-                    *records,
-                    {k: data.get(k, "") for k in ("status", "evidence", "limitations")},
-                ],
-            }
-            return s.save(
-                obj["id"],
-                data["expected_revision"],
-                content=content,
-                reason="explicit technical acceptance; no scientific approval",
-                merge=False,
-            )
-        if action in {
-            "project.update",
-            "project.archive",
-            "project.restore",
-            "object.save",
-            "object.rename",
-            "object.archive",
-        }:
-            obj = self.writable(data["id"], scope)
-            from .figure_definition import is_definition
-
-            require(
-                not is_definition(obj) or action == "object.archive",
-                "文件优先的主图必须通过组成文件服务修改",
-                "file_authority",
-                409,
-            )
-            require(
-                not isinstance(data.get("content"), dict)
-                or not data["content"].get("definition_schema"),
-                "主图文件身份只能由定义服务登记",
-                "file_authority",
-                409,
-            )
-            archived = (
-                action.endswith("archive")
-                if action in {"project.archive", "project.restore", "object.archive"}
-                else data.get("archived")
-            )
-            result = s.save(
-                obj["id"],
-                data["expected_revision"],
-                content=data.get("content"),
-                title=data.get("title"),
-                metadata=data.get("metadata"),
-                archived=archived,
-            )
-            if self.runner:
-                self.runner.stop_revoked()
-            return result
-        if action == "object.create":
-            kind = data["kind"]
-            require(kind in KINDS, "不支持的成果类型")
-            require(
-                not isinstance(data.get("content"), dict)
-                or not data["content"].get("definition_schema"),
-                "主图定义须经文件服务创建",
-                "file_authority",
-                409,
-            )
-            self.writable(data["project_id"], scope)
-            obj = s.create(
-                kind,
-                data["title"],
-                data["project_id"],
-                data.get("content", default_content(kind)),
-                data.get("metadata", {}),
-            )
-            s.relate(data["project_id"], obj["id"], "contains", "confirmed")
-            return obj
-        if action == "object.restore":
-            obj = self.writable(data["id"], scope)
-            from .figure_definition import is_definition
-
-            require(
-                not is_definition(obj),
-                "主图历史仍保留；恢复须通过定义文件的明确新修订",
-                "file_authority",
-                409,
-            )
-            result = s.restore(data["id"], data["revision"], data["expected_revision"])
-            if self.runner:
-                self.runner.stop_revoked()
-            return result
-        if action == "annotation.add":
-            self.writable(data["object_id"], scope)
-            return s.annotate(
-                data["object_id"],
-                data["revision"],
-                data.get("anchor", {}),
-                data["text"],
-            )
-        if action == "review.record":
-            target = self.writable(data["object_id"], scope)
-            reviewed = s.get(target["id"], data["revision"])
-            report = self.get(data["review_object_id"], scope, data["review_revision"])
-            require(report["kind"] in {"report", "note"}, "审阅依据需要可读报告或笔记")
-            require(
-                report["project_id"] == target["project_id"]
-                or target["project_id"] in report["metadata"].get("shared_with", []),
-                "审阅依据尚未授权给目标项目",
-                "forbidden",
-                403,
-            )
-            require(
-                data.get("verdict")
-                in {"needs_revision", "usable_for_discussion", "reviewed_with_limits"},
-                "审阅判断不支持；此操作不授予科学批准或用户验收",
-            )
-            require(
-                data.get("scope", "").strip()
-                and data.get("summary", "").strip()
-                and data.get("reviewer_reference", "").strip(),
-                "需要审阅范围、具体判断与审阅者来源",
-            )
-            return s.record_review(
-                target["id"],
-                reviewed["revision"],
-                {
-                    **{
-                        k: data[k]
-                        for k in (
-                            "review_object_id",
-                            "review_revision",
-                            "verdict",
-                            "scope",
-                            "summary",
-                            "reviewer_reference",
-                        )
-                    },
-                    "review_source_sha256": digest(report),
-                },
-            )
-        if action == "annotation.update":
-            self.writable(data["object_id"], scope)
-            with s.transaction() as c:
-                row = c.execute(
-                    "SELECT * FROM annotations WHERE id=? AND object_id=?",
-                    (data["id"], data["object_id"]),
-                ).fetchone()
-                require(row, "批注不存在", "not_found", 404)
-                status = data.get("status", row["status"])
-                require(
-                    status in {"anchored", "orphaned", "text_changed", "resolved"},
-                    "批注状态不支持",
-                )
-                c.execute(
-                    "UPDATE annotations SET text=?,status=? WHERE id=?",
-                    (data.get("text", row["text"]), status, data["id"]),
-                )
-                s.event(
-                    c,
-                    "annotation.updated",
-                    data["object_id"],
-                    {"id": data["id"], "previous_text": row["text"]},
-                )
-            return s.annotations(data["object_id"])
-        if isinstance(action, str) and action.startswith("graph."):
-            return self.graph(data, scope)
-        if action in {"dependency.accept", "dependency.retain"}:
-            rel = next((r for r in s.relations() if r["id"] == data["id"]), None)
-            require(rel, "引用不存在", "not_found", 404)
-            self.writable(rel["src"], scope)
-            self.get(rel["dst"], scope)
-            updated = s.accept_dependency(
-                data["id"],
-                data["target_revision"],
-                action.endswith("accept"),
-                expected_relation_revision=data.get("relation_revision"),
-                expected_source_revision=data.get("expected_revision"),
-            )
-            return [
-                relation
-                for relation in updated
-                if self._relation_allowed(relation, scope)
-            ]
-        if action == "asset.inspect":
-            project = self.writable(data.get("project_id"), scope)
-            require(project["kind"] == "project", "请选择资产所属项目")
-            asset = self.asset(data.get("sha"), scope, project["id"])
-            with (s.blobs / asset["sha"]).open("rb") as source:
-                header = source.read(24)
-            detected = (
-                "png"
-                if header.startswith(b"\x89PNG\r\n\x1a\n")
-                else "jpeg"
-                if header.startswith(b"\xff\xd8\xff")
-                else None
-            )
-            supported = bool(
-                detected
-                and asset["media_type"]
-                == {"png": "image/png", "jpeg": "image/jpeg"}[detected]
-            )
-            return {k: asset[k] for k in ["sha", "url", "filename", "media_type"]} | {
-                "byte_size": asset["size"],
-                "project_id": project["id"],
-                "supported_image": supported,
-                "detected_format": detected,
-                "validation": "Stored SHA and PNG/JPEG signature plus registered MIME checked; full image decoding is not implied.",
-            }
-        if action == "asset.import":
-            return self.import_asset(data, scope)
-        if action == "object.import":
-            self.writable(data["project_id"], scope)
-            self.asset(data["asset_sha"], scope, data["project_id"])
-            from .artifacts import ArtifactEngine
-
-            return ArtifactEngine(s, self.config.get("rendering", {})).import_document(
-                data["asset_sha"],
-                kind=data.get("kind", "report"),
-                title=data.get("title"),
-                project_id=data["project_id"],
-            )
-        if action == "object.authorize_code":
-            require(scope is None, "仅所有者可授权运行导入脚本", "forbidden", 403)
-            obj = self.get(data["id"])
-            require(
-                data.get("approved") is True and data.get("reason"),
-                "需要明确授权及其范围",
-            )
-            require(
-                obj["revision"] == data["expected_revision"],
-                "脚本对象已更新，需重新审查",
-                "conflict",
-                409,
-            )
-            script = obj["content"].get("script_asset")
-            require(script, "此对象没有待执行脚本")
-            s.asset(script)
-            s.set_setting(
-                "code_grant:" + obj["id"],
-                {"script_sha": script, "reason": data["reason"], "at": now()},
-            )
-            return {"authorized_script_sha": script}
-        if action in {"object.export", "figure.render"}:
-            obj = self.writable(data["id"], scope)
-            from .figure_definition import is_definition
-
-            require(
-                action != "figure.render" or not is_definition(obj),
-                "主图使用组成渲染，不通过单脚本图的修改入口",
-                "file_authority",
-                409,
-            )
-            from .artifacts import ArtifactEngine
-
-            engine = ArtifactEngine(s, self.config.get("rendering", {}))
-            require(
-                obj["revision"] == data.get("expected_revision", obj["revision"]),
-                "成果已更新",
-                "conflict",
-                409,
-            )
-            grant = s.setting("code_grant:" + obj["id"], {})
-            allowed_code = bool(
-                grant and grant.get("script_sha") == obj["content"].get("script_asset")
-            )
-            if action == "figure.render":
-                content = copy.deepcopy(obj["content"])
-                if data.get("overlays") is not None:
-                    content["overlays"] = data["overlays"]
-                if data.get("input_assets") is not None:
-                    content["input_assets"] = data["input_assets"]
-                if content != obj["content"]:
-                    obj = s.save(
-                        obj["id"],
-                        obj["revision"],
-                        content=content,
-                        reason="explicit figure source update",
-                        merge=False,
-                    )
-                result = engine.render_figure(obj, authorized_code=allowed_code)
-            else:
-                obj = self.get(obj["id"], scope, data.get("revision", obj["revision"]))
-                result = engine.export(
-                    obj, data["format"], authorized_code=allowed_code
-                )
-            s.record_export(obj["id"], obj["revision"], result)
-            return {**result, "object": self.render_view(obj, scope)}
-        if action == "feedback.record_external_action":
-            from .feedback_external import record
-
-            return record(self, data, scope, principal)
-        if action.startswith("feedback."):
-            return self.feedback(data, scope)
-        if action == "task.resolve":
-            from .resolver import resolve
-
-            return resolve(self, data, scope)
-        if action in {"task.submit", "workshop.submit", "commission.submit"}:
-            return self.submit(data, scope)
-        if action in {
-            "task.recover_stopped_candidate_preview",
-            "task.recover_stopped_candidate",
-        }:
-            from .stopped_candidate import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if action in {
-            "task.control",
-            "task.guide",
-            "task.extend_budget",
-            "task.revise_candidate",
-        }:
-            task = s.task(data["id"])
-            if task["payload"].get("kind") == "manuscript_revision":
-                from .manuscript_revision import task_access
-
-                with s.connect() as connection:
-                    task_access(self, task, scope, connection)
-            elif task["payload"].get("kind") == "project_management":
-                from .project_management import task_access
-
-                with s.connect() as connection:
-                    task_access(self, task, scope, connection)
-            else:
-                self.writable(task["project_id"], scope)
-            if action == "task.revise_candidate":
-                require(
-                    data.get("approved") is True,
-                    "需要明确选择按当前回答修订候选；此操作可能消耗既定剩余额度",
-                    "authorization_required",
-                    403,
-                )
-                require(
-                    task["payload"]["kind"] != "workshop", "工具任务不使用模型候选修订"
-                )
-                with s.transaction() as c:
-                    current = s.unpack(
-                        c.execute(
-                            "SELECT * FROM tasks WHERE id=?", (task["id"],)
-                        ).fetchone()
-                    )
-                    if current["payload"].get("kind") == "manuscript_revision":
-                        from .manuscript_revision import may_revise
-
-                        may_revise(self, current, c)
-                    require(
-                        current["status"] in {"waiting_input", "paused", "failed"},
-                        "请先停止执行并检查已保存候选",
-                        "conflict",
-                        409,
-                    )
-                    require(
-                        current["attempts"] < 3,
-                        "有限尝试次数已耗尽；未扩额度或新建会话",
-                        "budget_exhausted",
-                        409,
-                    )
-                    committed = c.execute(
-                        "SELECT value FROM kv WHERE key=?", ("commit:" + task["id"],)
-                    ).fetchone()
-                    produced = c.execute(
-                        "SELECT id FROM objects WHERE id=?",
-                        ("ART-" + task["id"].removeprefix("TASK-"),),
-                    ).fetchone()
-                    require(
-                        not current["result"].get("object_id")
-                        and not committed
-                        and not produced,
-                        "此任务已有保存成果；请在成果旁发起修订以保留用户编辑和版本，未消耗模型额度",
-                        "conflict",
-                        409,
-                    )
-                    snapshot = s.execution_inputs(c, task["id"])
-                    require(
-                        not s.question_blockers(c, task["id"]),
-                        "必要问题或来源尚待明确重新评估；未授权新的模型调用",
-                        "conflict",
-                        409,
-                    )
-                    require(
-                        data.get("input_snapshot") == snapshot,
-                        "回答或指导已变化，请重新读取后选择",
-                        "conflict",
-                        409,
-                    )
-                    grant = {
-                        "input_snapshot": snapshot,
-                        "state": "authorized",
-                        "at": now(),
-                        "permissions_changed": False,
-                        "budget_extended": False,
-                    }
-                    c.execute(
-                        "INSERT INTO kv VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-                        (
-                            "candidate_revision_authorized:" + task["id"],
-                            json.dumps(grant),
-                        ),
-                    )
-                    lease_row = c.execute(
-                        "SELECT value FROM kv WHERE key=?", ("execution:" + task["id"],)
-                    ).fetchone()
-                    if lease_row:
-                        lease = json.loads(lease_row[0])
-                        lease.update(
-                            state="revoked",
-                            reason="explicit candidate revision",
-                            revoked_at=now(),
-                        )
-                        c.execute(
-                            "UPDATE kv SET value=? WHERE key=?",
-                            (json.dumps(lease), "execution:" + task["id"]),
-                        )
-                    c.execute(
-                        "UPDATE tasks SET status='queued',error=NULL,updated_at=? WHERE id=?",
-                        (now(), task["id"]),
-                    )
-                    s.event(
-                        c,
-                        "task.candidate_revision_authorized",
-                        task["id"],
-                        grant,
-                        "user",
-                    )
-                if self.runner:
-                    self.runner.wake()
-                return {
-                    "task": s.task(task["id"]),
-                    "revision_authorized": True,
-                    "budget_extended": False,
-                    "permissions_changed": False,
-                }
-            if action == "task.extend_budget":
-                require(
-                    scope is None
-                    and data.get("approved") is True
-                    and data.get("reason"),
-                    "增加额度需要空间所有者明确确认范围与理由",
-                    "authorization_required",
-                    403,
-                )
-                require(
-                    task["status"]
-                    in {
-                        "failed",
-                        "waiting_resource",
-                        "waiting_authorization",
-                        "paused",
-                    },
-                    "仅可在执行停止后调整额度",
-                    "conflict",
-                    409,
-                )
-                route = (
-                    self.config.get("providers", {})
-                    .get(task["payload"].get("provider_id"), {})
-                    .get("route")
-                )
-                require(
-                    route == "codex",
-                    "原生Harness额度须核对其独立授权账本，不能从此入口绕过",
-                    "authorization_required",
-                    403,
-                )
-                calls = data.get("additional_invocations", 0)
-                seconds = data.get("additional_seconds", 0)
-                require(
-                    type(calls) == int
-                    and 0 <= calls <= 5
-                    and isinstance(seconds, (int, float))
-                    and 0 <= seconds <= 900
-                    and calls + seconds > 0,
-                    "需要有限新增额度",
-                )
-                previous = s.setting(
-                    "budget_extension:" + task["id"], {"invocations": 0, "seconds": 0}
-                )
-                value = {
-                    "invocations": previous["invocations"] + calls,
-                    "seconds": previous["seconds"] + seconds,
-                    "reason": data["reason"],
-                    "at": now(),
-                }
-                s.set_setting("budget_extension:" + task["id"], value)
-                with s.transaction() as c:
-                    s.event(
-                        c,
-                        "budget.explicit_extension",
-                        task["id"],
-                        {"previous": previous, "current": value},
-                        "owner",
-                    )
-                return {
-                    "task_id": task["id"],
-                    "extension": value,
-                    "consumption_preserved": True,
-                    "automatically_resumed": False,
-                }
-            if action == "task.guide":
-                require(data.get("text", "").strip(), "指导不能为空")
-                require(
-                    task["status"] not in {"cancelled", "deliverable"},
-                    "已结束任务不能接收新指导",
-                    "conflict",
-                    409,
-                )
-                author = data.get("source", "user")
-                require(
-                    author in {"user", "coordinator", "independent_review"},
-                    "指导来源不支持",
-                )
-                with s.transaction() as c:
-                    s.event(
-                        c,
-                        "task.guidance",
-                        task["id"],
-                        {
-                            "text": data["text"],
-                            "source": author,
-                            "source_reference": data.get("source_reference"),
-                            "scope": "next execution handoff; cannot grant permissions",
-                        },
-                        author,
-                    )
-                return {
-                    "task_id": task["id"],
-                    "guidance_saved": True,
-                    "takes_effect": "next execution handoff",
-                }
-            require(self.runner, "执行服务没有启动", "runtime_unavailable", 503)
-            if "expected_status" in data:
-                require(
-                    data["expected_status"] in ("queued", "running")
-                    and data.get("operation") == "pause",
-                    "暂停需要明确的执行中状态",
-                    "conflict",
-                    409,
-                )
-                return self.runner.control(
-                    task["id"],
-                    data["operation"],
-                    expected_status=data["expected_status"],
-                )
-            return self.runner.control(task["id"], data["operation"])
-        if action == "decision.answer":
-            return self.answer(data, scope)
-        if action in {
-            "question.materialize",
-            "question.bind",
-            "question.candidate_preview",
-            "question.reassess",
-        }:
-            return self.question_action(data, scope)
-        if action in {"literature.fulltext.fetch", "literature.fulltext.status"}:
-            from .literature_fulltext_service import dispatch
-
-            return dispatch(self, data, scope, principal)
-        if action.startswith("literature."):
-            from .literature import Literature
-
-            self.get(data["project_id"], scope)
-            return Literature(s, self.config.get("network", {})).dispatch(data)
-        if action.startswith("growth."):
-            return self.growth(data, scope)
-        if action.startswith("extension."):
-            require(scope is None, "仅空间所有者可管理扩展", "forbidden", 403)
-            from .extensions import Extensions
-
-            return Extensions(self).dispatch(data)
-        if action in {"settings.layer_preview", "settings.layer_update"}:
-            from .conventions import layer_action
-
-            return layer_action(s, data, scope)
-        if action == "settings.update":
-            require(scope is None, "仅空间所有者可管理设置", "forbidden", 403)
-            require(
-                data["key"] in {"domain", "preferences"},
-                "此配置需通过本机授权文件修改",
-                "forbidden",
-                403,
-            )
-            from .conventions import validate
-
-            s.set_setting(data["key"], validate(data["value"]))
-            return {"saved": True}
-        if action == "workspace.backup":
-            require(scope is None, "受限客户端不能导出整个空间", "forbidden", 403)
-            return self.backup()
-        raise Problem("未实现的操作：" + str(action), "not_implemented", 501)
+        return dispatch_command(self, validate_action_request(data), scope, principal)
 
     def graph(self, data, scope):
         if data["action"] == "graph.move":
@@ -1497,14 +673,14 @@ class App:
 
     def submit(
         self,
-        data,
-        scope=None,
+        data: JsonObject,
+        scope: Scope = None,
         register_feedback_action=True,
         *,
         connection=None,
         request_prefix="",
         domain_context=None,
-    ):
+    ) -> TaskRecord:
         s = self.store
         from .resolver import prepare_submission
 

@@ -25,6 +25,13 @@ import xml.etree.ElementTree as ET
 from .store import Problem, digest, encoded, require, uid
 from .document_sequence import document_markdown, markdown_segments, ordered_segments
 from .process_output import DEFAULT_OUTPUT_LIMIT_BYTES, capture_process
+from .render_contract import (
+    ProcessRecord,
+    RenderContractError,
+    RenderSuccess,
+    validate_render_request,
+    validate_render_result,
+)
 
 MIME = {
     "md": "text/markdown",
@@ -54,7 +61,7 @@ def latex_caption(value):
 
 def run_process(
     command, *, cwd, timeout=90, env=None, output_limit_bytes=DEFAULT_OUTPUT_LIMIT_BYTES
-):
+) -> ProcessRecord:
     """输出限额由 stdout/stderr 共享，不因尾部截断重置。"""
     try:
         captured = capture_process(
@@ -68,7 +75,7 @@ def run_process(
         raise Problem(
             str(exc), "runtime_unavailable", 503, {"command": command}
         ) from exc
-    record = {
+    record: ProcessRecord = {
         "command": command,
         "returncode": captured.returncode,
         "elapsed_seconds": captured.elapsed_seconds,
@@ -154,6 +161,8 @@ if reader_path not in manifest['files']:
     raise SystemExit('Missing verified dependency reader')
 if 'runtime/figure_interaction.py' not in manifest['files']:
     raise SystemExit('Missing verified figure interaction helper')
+if 'runtime/render_contract.py' not in manifest['files']:
+    raise SystemExit('Missing verified render contract helper')
 import runpy
 source_assets = runpy.run_path(str(local(reader_path)))['source_assets']
 def canonical(value):
@@ -867,13 +876,16 @@ class ArtifactEngine:
             "media_type": info["media_type"],
         }
 
-    def _worker(self, job, work, runtime):
+    def _worker(self, job, work, runtime) -> RenderSuccess:
         request = work / ("request-" + str(time.time_ns()) + ".json")
         response = request.with_suffix(".result.json")
-        request.write_text(
-            encoded({**job, "output_dir": str(work), "response": str(response)}),
-            encoding="utf-8",
-        )
+        try:
+            payload = validate_render_request(
+                {**job, "output_dir": str(work), "response": str(response)}
+            )
+        except RenderContractError as exc:
+            raise Problem(str(exc), "invalid", 422) from exc
+        request.write_text(encoded(payload), encoding="utf-8")
         env = os.environ.copy()
         env["MPLCONFIGDIR"] = str(work / "mplconfig")
         env["PYTHONDONTWRITEBYTECODE"] = "1"
@@ -888,14 +900,17 @@ class ArtifactEngine:
             env=env,
         )
         require(response.exists(), "渲染器未返回结果", "render_failed", 422, record)
-        value = json.loads(response.read_text())
-        require(
-            value.get("ok"),
-            value.get("error", "渲染失败"),
-            value.get("code", "render_failed"),
-            422,
-            {"worker": value, "process": record},
-        )
+        try:
+            value = validate_render_result(json.loads(response.read_text()))
+        except ValueError as exc:
+            raise Problem("渲染器返回了无效结果", "render_failed", 422, record) from exc
+        if not value["ok"]:
+            raise Problem(
+                value["error"],
+                value.get("code", "render_failed"),
+                422,
+                {"worker": value, "process": record},
+            )
         value["process"] = record
         return value
 
@@ -3174,6 +3189,9 @@ class ArtifactEngine:
             )
             (package / "runtime/process_output.py").write_bytes(
                 Path(__file__).with_name("process_output.py").read_bytes()
+            )
+            (package / "runtime/render_contract.py").write_bytes(
+                Path(__file__).with_name("render_contract.py").read_bytes()
             )
             (package / "runtime/docx_semantics41.py").write_bytes(
                 Path(__file__).with_name("docx_semantics41.py").read_bytes()

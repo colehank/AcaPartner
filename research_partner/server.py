@@ -1,26 +1,26 @@
 """Loopback-first HTTP interface. Task ownership belongs to the runtime."""
 
-import base64
 import hashlib
-import json
 import mimetypes
-import os
 import secrets
 import threading
 import time
 import urllib.parse
+from collections.abc import Mapping
 from http.cookies import SimpleCookie, CookieError
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from .app import App
-from .store import Problem, require, now
+from .store import Problem, require
 from .authentication import token_fingerprint
 from .local_accounts import LocalAccounts
 from .action_contract import validate_action_request
+from .contracts import JsonObject, Principal, Scope
 from .diagnostics import record_internal_error
+from .http_boundary import JSON_MEDIA, MAX_JSON_BODY, encode_response, read_json_body
 
 
-def serve(app: App, host="127.0.0.1", port=8877):
+def serve(app: App, host: str = "127.0.0.1", port: int = 8877) -> ThreadingHTTPServer:
     require(
         host in {"127.0.0.1", "localhost", "::1"}
         or app.config.get("access_token_file"),
@@ -71,12 +71,12 @@ def serve(app: App, host="127.0.0.1", port=8877):
     login_attempts = {}
     webroot = Path(__file__).parent / "web"
 
-    def auth_required():
+    def auth_required() -> bool:
         return bool(
             accounts or app.config.get("access_token_file") or app.config.get("clients")
         )
 
-    def credential_scope(fingerprint):
+    def credential_scope(fingerprint: str) -> tuple[bool, Scope]:
         owner = (
             token_fingerprint(app.config["access_token_file"])
             if app.config.get("access_token_file")
@@ -142,7 +142,7 @@ def serve(app: App, host="127.0.0.1", port=8877):
                 item["secure"] = True
             return item.OutputString()
 
-        def authentication(self):
+        def authentication(self) -> tuple[bool, Scope, bool]:
             authorization = self.headers.get("Authorization")
             if authorization is not None:
                 scheme, _, value = authorization.partition(" ")
@@ -185,12 +185,12 @@ def serve(app: App, host="127.0.0.1", port=8877):
                 "session_active": active,
             }
 
-        def scope(self):
+        def scope(self) -> Scope:
             authenticated, scope, _ = self.authentication()
             require(authenticated, "请登录后继续", "unauthorized", 401)
             return scope
 
-        def management_principal(self):
+        def management_principal(self) -> Principal:
             # Identity comes from the authenticated connection, never request JSON.
             authorization = self.headers.get("Authorization")
             if authorization is not None:
@@ -206,8 +206,11 @@ def serve(app: App, host="127.0.0.1", port=8877):
                     return self.credential_principal(record["credential_fingerprint"])
             return {"kind": "loopback"}
 
-        def credential_principal(self, fingerprint):
-            principal = {"kind": "credential", "credential_sha256": fingerprint}
+        def credential_principal(self, fingerprint: str) -> Principal:
+            principal: Principal = {
+                "kind": "credential",
+                "credential_sha256": fingerprint,
+            }
             for client in app.config.get("clients", []):
                 if token_fingerprint(
                     client.get("token_file", "")
@@ -220,59 +223,33 @@ def serve(app: App, host="127.0.0.1", port=8877):
                     )
             return principal
 
-        def post_body(self, address, csrf_required=True, limit=180 * 1024 * 1024):
-            origin = self.headers.get("Origin")
-            require(
-                not origin or origin == (public_origin or "http://" + address),
-                "来源不匹配",
-                "forbidden",
-                403,
+        def post_body(
+            self, address: str, csrf_required: bool = True, limit: int = MAX_JSON_BODY
+        ) -> JsonObject:
+            return read_json_body(
+                self.headers,
+                self.rfile,
+                address=address,
+                public_origin=public_origin,
+                csrf_token=csrf,
+                csrf_required=csrf_required,
+                limit=limit,
             )
-            require(
-                self.headers.get("Sec-Fetch-Site") in {None, "same-origin", "none"},
-                "拒绝跨来源请求",
-                "forbidden",
-                403,
-            )
-            if csrf_required:
-                require(
-                    secrets.compare_digest(self.headers.get("X-CSRF-Token", ""), csrf),
-                    "写入令牌失效，请保留草稿并刷新",
-                    "csrf",
-                    403,
-                )
-            require(
-                self.headers.get("Content-Type", "").split(";")[0]
-                == "application/json",
-                "需要JSON",
-                status=415,
-            )
-            length = int(self.headers.get("Content-Length", "0"))
-            require(0 < length <= limit, "请求大小无效")
-            data = json.loads(self.rfile.read(length))
-            require(isinstance(data, dict), "需要JSON对象")
-            return data
 
         def send(
-            self, status, body, media="application/json; charset=utf-8", extra=None
-        ):
-            if not isinstance(body, bytes):
-                body = json.dumps(body, ensure_ascii=False).encode()
+            self,
+            status: int,
+            body: object,
+            media: str = JSON_MEDIA,
+            extra: Mapping[str, str] | None = None,
+        ) -> None:
+            response = encode_response(body, media, extra)
             self.send_response(status)
-            self.send_header("Content-Type", media)
-            self.send_header("Content-Length", str(len(body)))
-            self.send_header("X-Content-Type-Options", "nosniff")
-            self.send_header("Cache-Control", "no-store")
-            self.send_header("Referrer-Policy", "no-referrer")
-            self.send_header(
-                "Content-Security-Policy",
-                "default-src 'self'; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'",
-            )
-            for k, v in (extra or {}).items():
-                self.send_header(k, v)
+            for key, value in response.headers:
+                self.send_header(key, value)
             self.end_headers()
             try:
-                self.wfile.write(body)
+                self.wfile.write(response.body)
             except (BrokenPipeError, ConnectionResetError):
                 pass
 
@@ -337,7 +314,10 @@ def serve(app: App, host="127.0.0.1", port=8877):
         def request(self):
             try:
                 address = self.headers.get("Host", "")
-                hostname = urllib.parse.urlsplit("//" + address).hostname
+                try:
+                    hostname = urllib.parse.urlsplit("//" + address).hostname
+                except ValueError:
+                    raise Problem("无效Host") from None
                 allowed = {
                     "127.0.0.1",
                     "localhost",
@@ -346,7 +326,10 @@ def serve(app: App, host="127.0.0.1", port=8877):
                     *app.config.get("allowed_hosts", []),
                 }
                 require(hostname in allowed, "Host不在配置允许范围", "forbidden", 403)
-                url = urllib.parse.urlsplit(self.path)
+                try:
+                    url = urllib.parse.urlsplit(self.path)
+                except ValueError:
+                    raise Problem("无效请求路径") from None
                 require(not url.scheme and not url.netloc, "无效请求路径")
                 if self.command == "GET" and url.path == "/api/auth/status":
                     status = self.auth_status()
@@ -503,9 +486,14 @@ def serve(app: App, host="127.0.0.1", port=8877):
                     if url.path.startswith("/api/objects/"):
                         ident = urllib.parse.unquote(url.path.split("/")[-1])
                         query = urllib.parse.parse_qs(url.query)
-                        revision = (
-                            int(query["revision"][0]) if "revision" in query else None
-                        )
+                        try:
+                            revision = (
+                                int(query["revision"][0])
+                                if "revision" in query
+                                else None
+                            )
+                        except ValueError:
+                            raise Problem("版本号格式无效") from None
                         consumer = query.get("consumer", [None])[0]
                         return self.send(
                             200,
@@ -594,12 +582,12 @@ def serve(app: App, host="127.0.0.1", port=8877):
                         "details": e.details,
                     },
                 )
-            except (KeyError, ValueError, TypeError) as e:
+            except (KeyError, ValueError, TypeError):
                 return self.send(
                     400,
                     {
                         "ok": False,
-                        "error": "请求字段不完整或格式错误：" + str(e),
+                        "error": "请求字段不完整或格式错误",
                         "code": "invalid",
                     },
                 )

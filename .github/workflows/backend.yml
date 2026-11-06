@@ -2,7 +2,6 @@ name: Backend
 
 on:
   push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -33,19 +32,11 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install backend development tools
         run: python -m pip install -e '.[dev]'
-      - name: Check backend syntax and undefined names
-        run: python -m ruff check --select E9,F63,F7,F82 research_partner tools tests
-      - name: Check maintained backend modules
-        run: >-
-          python -m ruff check
-          research_partner/action_contract.py research_partner/diagnostics.py
-          research_partner/process_output.py research_partner/provider_availability.py
-          tests
+      - name: Check backend lint
+        run: python tools/check_backend.py lint
       - name: Check maintained backend formatting
-        run: >-
-          python -m ruff format --check
-          research_partner/action_contract.py research_partner/diagnostics.py
-          research_partner/process_output.py research_partner/provider_availability.py
-          tests
+        run: python tools/check_backend.py format
+      - name: Check public boundary types
+        run: python tools/check_backend.py types
       - name: Run backend unit tests
-        run: python -W error::ResourceWarning -m unittest discover -s tests -t . -v
+        run: python tools/check_backend.py test

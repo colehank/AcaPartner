@@ -12,9 +12,18 @@ import stat
 import tempfile
 import threading
 import uuid
-from collections.abc import Iterator
+from collections.abc import Callable, Collection, Iterator
 from datetime import datetime, timezone
 from pathlib import Path
+
+from .contracts import (
+    JsonObject,
+    ResearchObject,
+    TaskPayload,
+    TaskRecord,
+    TaskResult,
+    TaskStatus,
+)
 
 
 def now():
@@ -282,7 +291,12 @@ class Store:
             ).fetchall()
         return [self.unpack(r) for r in rows]
 
-    def get(self, ident, revision=None, connection=None):
+    def get(
+        self,
+        ident: str | None,
+        revision: int | None = None,
+        connection: sqlite3.Connection | None = None,
+    ) -> ResearchObject:
         if connection is None:
             with self.connect() as c:
                 return self.get(ident, revision, c)
@@ -299,7 +313,12 @@ class Store:
         require(row, "研究对象不存在", "not_found", 404)
         return self.unpack(row)
 
-    def objects(self, project_id=None, kinds=None, include_archived=True):
+    def objects(
+        self,
+        project_id: str | None = None,
+        kinds: Collection[str] | None = None,
+        include_archived: bool = True,
+    ) -> list[ResearchObject]:
         with self.connect() as c:
             rows = c.execute(
                 "SELECT * FROM objects WHERE (? IS NULL OR project_id=? OR id=?) ORDER BY updated_at DESC",
@@ -1256,17 +1275,17 @@ class Store:
 
     def create(
         self,
-        kind,
-        title,
-        project_id=None,
-        content=None,
-        metadata=None,
-        actor="user",
-        ident=None,
-        task_id=None,
-        execution_token=None,
-        connection=None,
-    ):
+        kind: str,
+        title: str,
+        project_id: str | None = None,
+        content: JsonObject | None = None,
+        metadata: JsonObject | None = None,
+        actor: str = "user",
+        ident: str | None = None,
+        task_id: str | None = None,
+        execution_token: str | None = None,
+        connection: sqlite3.Connection | None = None,
+    ) -> ResearchObject:
         require(isinstance(title, str) and title.strip(), "请输入可读标题")
         require(
             kind
@@ -1344,18 +1363,9 @@ class Store:
                 "created_at": t,
                 "updated_at": t,
             }
-            self.validate_article_object(c, obj)
-            self.require_figure_layout_runtime(c, obj)
-            self.require_manuscript_format_runtime(c, obj)
-            self.require_member_snapshot_runtime(c, obj)
-            if kind == "paper":
-                from .paper_sources import source_state
+            from .object_policies import validate_object_policies
 
-                state = source_state(obj)
-                if state["selection_explicit"]:
-                    from .compatibility import require_features
-
-                    require_features(c, ["paper_source_selection_v1"])
+            validate_object_policies(self, c, obj)
             c.execute(
                 "INSERT INTO objects VALUES(?,?,?,?,?,?,?,?,?,?)",
                 (
@@ -1384,55 +1394,21 @@ class Store:
 
     @staticmethod
     def require_member_snapshot_runtime(connection, obj):
-        if (
-            obj.get("kind") == "dataset"
-            and obj.get("content", {}).get("authority_kind")
-            == "immutable_member_manifest"
-        ):
-            from .compatibility import require_features
+        from .object_policies import require_member_snapshot_runtime
 
-            require_features(connection, ["chunked_member_snapshot_v1"])
+        return require_member_snapshot_runtime(connection, obj)
 
     @staticmethod
     def require_figure_layout_runtime(connection, obj):
-        if obj.get("kind") != "figure":
-            return
-        layers = obj.get("content", {}).get("overlays", [])
-        targets = (
-            list(layers)
-            if isinstance(layers, dict)
-            else [
-                layer.get("target") or layer.get("object_id") or layer.get("id")
-                for layer in layers
-                if isinstance(layer, dict)
-            ]
-            if isinstance(layers, list)
-            else []
-        )
-        if any(
-            target == "figure:root"
-            or isinstance(target, str)
-            and target.startswith("colorbar:")
-            for target in targets
-        ):
-            from .compatibility import require_features
+        from .object_policies import require_figure_layout_runtime
 
-            require_features(connection, ["figure_visual_layout_v1"])
+        return require_figure_layout_runtime(connection, obj)
 
     @staticmethod
     def require_manuscript_format_runtime(connection, obj):
-        if "manuscript_format" not in obj.get("metadata", {}):
-            return
-        require(
-            obj.get("kind") in {"report", "note", "paper", "workshop_note"},
-            "格式配置只适用于文稿",
-        )
-        from .manuscript_format40 import normalize_format
+        from .object_policies import require_manuscript_format_runtime
 
-        normalize_format(obj["metadata"]["manuscript_format"])
-        from .compatibility import require_features
-
-        require_features(connection, ["manuscript_format_v1"])
+        return require_manuscript_format_runtime(connection, obj)
 
     def snapshot(self, c, obj, actor, reason):
         c.execute(
@@ -1442,22 +1418,22 @@ class Store:
 
     def save(
         self,
-        ident,
-        expected_revision,
-        content=None,
-        title=None,
-        metadata=None,
-        archived=None,
-        actor="user",
-        reason="edit",
-        merge=True,
-        operation_key=None,
-        task_id=None,
-        execution_token=None,
-        question_source_snapshot=None,
-        connection=None,
-        prepared_updated_at=None,
-    ):
+        ident: str,
+        expected_revision: int,
+        content: JsonObject | None = None,
+        title: str | None = None,
+        metadata: JsonObject | None = None,
+        archived: bool | None = None,
+        actor: str = "user",
+        reason: str = "edit",
+        merge: bool = True,
+        operation_key: str | None = None,
+        task_id: str | None = None,
+        execution_token: str | None = None,
+        question_source_snapshot: list[JsonObject] | None = None,
+        connection: sqlite3.Connection | None = None,
+        prepared_updated_at: str | None = None,
+    ) -> ResearchObject:
         # Internal staged-render commits prepare their complete future snapshot
         # before rendering. Public actions never forward this timestamp.
         if prepared_updated_at is not None:
@@ -1598,22 +1574,9 @@ class Store:
                     "revision": old["revision"] + 1,
                     "updated_at": prepared_updated_at or now(),
                 }
-                self.validate_article_object(c, obj)
-                self.require_figure_layout_runtime(c, obj)
-                self.require_manuscript_format_runtime(c, obj)
-                self.require_member_snapshot_runtime(c, obj)
-                require(
-                    isinstance(obj["title"], str) and obj["title"].strip(),
-                    "标题不能为空",
-                )
-                if obj["kind"] == "paper":
-                    from .paper_sources import source_state
+                from .object_policies import validate_object_policies
 
-                    state = source_state(obj)
-                    if state["selection_explicit"]:
-                        from .compatibility import require_features
-
-                        require_features(c, ["paper_source_selection_v1"])
+                validate_object_policies(self, c, obj, saving=True)
                 c.execute(
                     "UPDATE objects SET title=?,revision=?,content=?,metadata=?,archived=?,updated_at=? WHERE id=?",
                     (
@@ -1655,52 +1618,13 @@ class Store:
         return obj
 
     def validate_article_object(self, c, obj):
-        if obj["kind"] == "workshop_note":
-            from .article_workspace import sections
-            from .compatibility import require_features
+        from .object_policies import validate_article_object
 
-            require_features(c, ["article_workspace_v1"])
-            content = obj["content"]
-            manuscript = self.get(content.get("manuscript_id"), connection=c)
-            require(
-                manuscript["kind"] in {"paper", "report"}
-                and manuscript["project_id"] == obj["project_id"],
-                "工坊笔记必须关联本项目稿件",
-                "article_note_conflict",
-                409,
-            )
-            matches = [
-                s for s in sections(manuscript) if s["id"] == content.get("section_id")
-            ]
-            require(
-                len(matches) == 1
-                and matches[0]["anchor_valid"]
-                and matches[0]["heading_block_id"] == content.get("section_block_id"),
-                "工坊笔记章节身份不符",
-                "article_note_conflict",
-                409,
-            )
-        if obj["kind"] in {
-            "paper",
-            "report",
-            "note",
-            "figure",
-            "diagram",
-            "poster",
-            "slides",
-        }:
-            for ident in self.reference_ids(obj["content"]):
-                row = c.execute(
-                    "SELECT kind FROM objects WHERE id=?", (ident,)
-                ).fetchone()
-                require(
-                    not row or row["kind"] != "workshop_note",
-                    "准备笔记不能成为成果正文/导出的依赖",
-                    "preparation_boundary",
-                    409,
-                )
+        return validate_article_object(self, c, obj)
 
-    def restore(self, ident, target_revision, expected_revision):
+    def restore(
+        self, ident: str, target_revision: int, expected_revision: int
+    ) -> ResearchObject:
         target = self.get(ident, target_revision)
         return self.save(
             ident,
@@ -1735,7 +1659,7 @@ class Store:
                 409,
             )
         require(isinstance(text, str) and text.strip(), "批注不能为空")
-        obj = self.get(ident, revision, connection=connection)
+        self.get(ident, revision, connection=connection)
         aid = uid("ANN")
         with (
             self.transaction()
@@ -1760,6 +1684,57 @@ class Store:
             return self.unpack(
                 c.execute("SELECT * FROM annotations WHERE id=?", (aid,)).fetchone()
             )
+
+    def update_annotation(
+        self, ident, object_id, *, text=_ABSENT, status=_ABSENT, connection=None
+    ):
+        if connection is not None:
+            require(
+                isinstance(connection, _StoreConnection)
+                and connection.asset_store == self.db
+                and connection.in_transaction
+                and connection.new_asset_files is not None,
+                "批注写入需要本工作区托管事务",
+                "asset_transaction",
+                409,
+            )
+        with (
+            self.transaction()
+            if connection is None
+            else contextlib.nullcontext(connection)
+        ) as c:
+            row = c.execute(
+                "SELECT * FROM annotations WHERE id=? AND object_id=?",
+                (ident, object_id),
+            ).fetchone()
+            require(row, "批注不存在", "not_found", 404)
+            next_status = row["status"] if status is _ABSENT else status
+            require(
+                next_status in {"anchored", "orphaned", "text_changed", "resolved"},
+                "批注状态不支持",
+            )
+            c.execute(
+                "UPDATE annotations SET text=?,status=? WHERE id=? AND object_id=?",
+                (
+                    row["text"] if text is _ABSENT else text,
+                    next_status,
+                    ident,
+                    object_id,
+                ),
+            )
+            self.event(
+                c,
+                "annotation.updated",
+                object_id,
+                {"id": ident, "previous_text": row["text"]},
+            )
+            return [
+                self.unpack(annotation)
+                for annotation in c.execute(
+                    "SELECT * FROM annotations WHERE object_id=? ORDER BY created_at",
+                    (object_id,),
+                )
+            ]
 
     def _anchors(self, c, obj):
         def collect(value, result):
@@ -2516,7 +2491,7 @@ class Store:
 
     def _verify_asset_blob(self, sha, size, check=None):
         """Full strong verification with bounded memory; this is not a hash cache."""
-        path = self.blobs / sha
+        self.blobs / sha
         directory = None
         try:
             directory = os.open(
@@ -2853,14 +2828,14 @@ class Store:
 
     def submit(
         self,
-        payload,
-        request_key,
+        payload: TaskPayload,
+        request_key: str,
         *,
-        parent_fence=None,
-        connection=None,
-        initial_result=None,
-        preflight=None,
-    ):
+        parent_fence: JsonObject | None = None,
+        connection: sqlite3.Connection | None = None,
+        initial_result: TaskResult | None = None,
+        preflight: Callable[[sqlite3.Connection], object] | None = None,
+    ) -> TaskRecord:
         require(
             isinstance(request_key, str) and request_key.strip(), "任务需要稳定请求标识"
         )
@@ -2914,7 +2889,9 @@ class Store:
                 c.execute("SELECT * FROM tasks WHERE id=?", (tid,)).fetchone()
             )
 
-    def task(self, ident, connection=None):
+    def task(
+        self, ident: str, connection: sqlite3.Connection | None = None
+    ) -> TaskRecord:
         with (
             self.connect() if connection is None else contextlib.nullcontext(connection)
         ) as c:
@@ -2939,7 +2916,7 @@ class Store:
             ]
             return result
 
-    def tasks(self):
+    def tasks(self) -> list[TaskRecord]:
         with self.connect() as c:
             return [
                 self.unpack(r)
@@ -2948,13 +2925,13 @@ class Store:
 
     def task_update(
         self,
-        ident,
-        status,
-        result=None,
-        error=None,
-        attempts=None,
-        execution_token=None,
-    ):
+        ident: str,
+        status: TaskStatus,
+        result: TaskResult | None = None,
+        error: str | None = None,
+        attempts: int | None = None,
+        execution_token: str | None = None,
+    ) -> TaskRecord:
         allowed = {
             "queued",
             "running",

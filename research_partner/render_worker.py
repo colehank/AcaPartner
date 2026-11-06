@@ -49,6 +49,27 @@ except ImportError:
     )
 
 
+try:
+    from .render_contract import (
+        RenderContractError,
+        RenderResult,
+        render_response_path,
+        validate_render_request,
+        validate_render_result,
+    )
+except ImportError:
+    try:
+        from render_contract import (
+            RenderContractError,
+            RenderResult,
+            render_response_path,
+            validate_render_request,
+            validate_render_result,
+        )
+    except ImportError:
+        raise SystemExit("Missing render contract helper: render_contract.py") from None
+
+
 def figure_property_schema(artist, typ, fig, owner_axes=None):
     """Describe setter input coordinates, never the screen-normalized hit box."""
     schema = {}
@@ -687,7 +708,7 @@ def legend_update_plan(fig, sources, artist, property_name):
         HandlerLineCollection,
     )
     from matplotlib.lines import Line2D
-    from matplotlib.collections import PathCollection, LineCollection
+    from matplotlib.collections import PathCollection
     from matplotlib.patches import Patch
 
     plans, failures = [], []
@@ -2651,7 +2672,7 @@ def document(job, work):
 
 def slides(job, work):
     from pptx import Presentation
-    from pptx.util import Inches, Pt
+    from pptx.util import Pt
     from pptx.dml.color import RGBColor
     from pptx.enum.shapes import MSO_SHAPE
     from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
@@ -2791,26 +2812,33 @@ def slides(job, work):
     }
 
 
-def main():
-    request = Path(sys.argv[1])
-    job = json.loads(request.read_text())
-    work = Path(job["output_dir"])
-    response = Path(job["response"])
-    budget = None
+def main() -> int:
     try:
+        request = Path(sys.argv[1])
+        raw_job = json.loads(request.read_text())
+        response = Path(render_response_path(raw_job))
+    except (IndexError, OSError, ValueError):
+        print("Invalid render request; response path unavailable", file=sys.stderr)
+        return 2
+    budget = None
+    result: RenderResult
+    try:
+        job = validate_render_request(raw_job)
+        work = Path(job["output_dir"])
         budget = OutputBudget(job.get("output_limit_bytes", DEFAULT_OUTPUT_LIMIT_BYTES))
         capture = BoundedTextCapture(budget, "stdout")
         errors = BoundedTextCapture(budget, "stderr")
         with contextlib.redirect_stdout(capture), contextlib.redirect_stderr(errors):
-            result = {
+            rendered = {
                 "figure": figure,
                 "canvas": canvas,
                 "document": document,
                 "slides": slides,
             }[job["operation"]](job, work)
         budget.check()
-        result.update(
+        result = validate_render_result(
             {
+                **rendered,
                 "ok": True,
                 "script_stdout": capture.getvalue(),
                 "script_stderr": errors.getvalue(),
@@ -2831,6 +2859,8 @@ def main():
         }
         if isinstance(error, OutputLimitExceeded):
             result["code"] = "render_output_limit"
+        elif isinstance(error, RenderContractError):
+            result["code"] = "invalid"
         if budget is not None:
             result.update(
                 {
@@ -2838,11 +2868,16 @@ def main():
                     "script_stderr": budget.text("stderr"),
                 }
             )
-    response.write_text(
-        json.dumps(result, ensure_ascii=False, default=str), encoding="utf-8"
-    )
+    try:
+        response.write_text(
+            json.dumps(result, ensure_ascii=False, default=str), encoding="utf-8"
+        )
+    except (OSError, ValueError):
+        print("Unable to write render response", file=sys.stderr)
+        return 2
     print(json.dumps({"ok": result["ok"], "response": str(response)}))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -388,7 +388,12 @@ class WorkerOutputCaptureTests(unittest.TestCase):
     ):
         runtime = self.root / "runtime"
         runtime.mkdir()
-        for name in ("render_worker.py", "figure_interaction.py", "process_output.py"):
+        for name in (
+            "render_worker.py",
+            "figure_interaction.py",
+            "process_output.py",
+            "render_contract.py",
+        ):
             shutil.copyfile(
                 Path(render_worker.__file__).with_name(name), runtime / name
             )
@@ -407,7 +412,8 @@ class WorkerOutputCaptureTests(unittest.TestCase):
             timeout=5,
         )
         result = json.loads(self.response.read_text())
-        self.assertEqual(result["type"], "KeyError")
+        self.assertEqual(result["type"], "RenderContractError")
+        self.assertEqual(result["code"], "invalid")
         self.assertFalse(json.loads(record["stdout"])["ok"])
 
 

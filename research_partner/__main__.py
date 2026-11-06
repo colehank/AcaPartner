@@ -4,6 +4,7 @@ import signal
 import sys
 from pathlib import Path
 from .store import Problem, uid
+from .action_contract import parse_action_json
 
 
 def main(argv=None):
@@ -52,7 +53,9 @@ def main(argv=None):
                 result = app.state()
             elif args.command == "action":
                 result = app.dispatch(
-                    json.loads(args.file.read_text() if args.file else sys.stdin.read())
+                    parse_action_json(
+                        args.file.read_text() if args.file else sys.stdin.read()
+                    )
                 )
             elif args.command == "backup":
                 result = app.backup()
