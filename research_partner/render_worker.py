@@ -4,7 +4,6 @@ import base64
 import contextlib
 import hashlib
 import importlib.metadata
-import io
 import json
 import math
 import mimetypes
@@ -20,6 +19,11 @@ try:
     from .figure_interaction import artist_interaction, figure_axes, figure_containers, artist_parent_figure, axes_position_reason
 except ImportError:
     from figure_interaction import artist_interaction, figure_axes, figure_containers, artist_parent_figure, axes_position_reason
+
+try:
+    from .process_output import BoundedTextCapture, DEFAULT_OUTPUT_LIMIT_BYTES, OutputBudget, OutputLimitExceeded
+except ImportError:
+    from process_output import BoundedTextCapture, DEFAULT_OUTPUT_LIMIT_BYTES, OutputBudget, OutputLimitExceeded
 
 
 def figure_property_schema(artist, typ, fig, owner_axes=None):
@@ -1269,13 +1273,27 @@ def slides(job, work):
 def main():
     request=Path(sys.argv[1]); job=json.loads(request.read_text()); work=Path(job["output_dir"])
     response=Path(job["response"])
+    budget = None
     try:
-        capture=io.StringIO()
-        with contextlib.redirect_stdout(capture):
+        budget = OutputBudget(job.get("output_limit_bytes", DEFAULT_OUTPUT_LIMIT_BYTES))
+        capture = BoundedTextCapture(budget, "stdout")
+        errors = BoundedTextCapture(budget, "stderr")
+        with contextlib.redirect_stdout(capture), contextlib.redirect_stderr(errors):
             result={"figure":figure,"canvas":canvas,"document":document,"slides":slides}[job["operation"]](job,work)
-        result.update({"ok":True,"script_stdout":capture.getvalue()[-12000:]})
+        budget.check()
+        result.update({"ok":True,"script_stdout":capture.getvalue(),"script_stderr":errors.getvalue()})
     except Exception as exc:
-        result={"ok":False,"error":str(exc),"type":type(exc).__name__,"traceback":traceback.format_exc()[-16000:]}
+        error = exc
+        if budget is not None:
+            try:
+                budget.check()
+            except OutputLimitExceeded as limit_exc:
+                error = limit_exc
+        result={"ok":False,"error":str(error),"type":type(error).__name__,"traceback":traceback.format_exc()[-16000:]}
+        if isinstance(error, OutputLimitExceeded):
+            result["code"] = "render_output_limit"
+        if budget is not None:
+            result.update({"script_stdout":budget.text("stdout"),"script_stderr":budget.text("stderr")})
     response.write_text(json.dumps(result,ensure_ascii=False,default=str),encoding="utf-8")
     print(json.dumps({"ok":result["ok"],"response":str(response)}))
 

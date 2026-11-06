@@ -15,8 +15,6 @@ import os
 from pathlib import Path
 import re
 import shutil
-import signal
-import subprocess
 import sys
 import tempfile
 import time
@@ -25,6 +23,7 @@ import xml.etree.ElementTree as ET
 
 from .store import Problem, digest, encoded, require, uid
 from .document_sequence import document_markdown, markdown_segments, ordered_segments
+from .process_output import DEFAULT_OUTPUT_LIMIT_BYTES, capture_process
 
 MIME = {"md": "text/markdown", "txt": "text/plain", "tex": "application/x-tex", "bib": "application/x-bibtex", "json": "application/json", "svg": "image/svg+xml", "pdf": "application/pdf", "png": "image/png", "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation", "zip": "application/zip"}
 
@@ -34,21 +33,20 @@ def latex_caption(value):
     return re.sub(r'^\s*(?:Figure|Fig\.|图)\s*\d+[A-Za-z]?\s*[.：:]\s*','',str(value),count=1,flags=re.I)
 
 
-def run_process(command, *, cwd, timeout=90, env=None):
-    """Capture real failures and terminate the complete child process group."""
-    started = time.monotonic()
+def run_process(command, *, cwd, timeout=90, env=None, output_limit_bytes=DEFAULT_OUTPUT_LIMIT_BYTES):
+    """输出限额由 stdout/stderr 共享，不因尾部截断重置。"""
     try:
-        p = subprocess.Popen(command, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
+        captured = capture_process(command, cwd=cwd, timeout=timeout, env=env, output_limit_bytes=output_limit_bytes)
     except OSError as exc:
         raise Problem(str(exc), "runtime_unavailable", 503, {"command": command}) from exc
-    try:
-        stdout, stderr = p.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        os.killpg(p.pid, signal.SIGKILL)
-        stdout, stderr = p.communicate()
-        raise Problem("渲染进程超时", "render_timeout", 504, {"command": command, "timeout": timeout, "stdout": stdout[-8000:], "stderr": stderr[-8000:]})
-    record = {"command": command, "returncode": p.returncode, "elapsed_seconds": round(time.monotonic() - started, 3), "stdout": stdout[-12000:], "stderr": stderr[-12000:]}
-    require(p.returncode == 0, "渲染进程失败", "render_failed", 422, record)
+    record = {"command": command, "returncode": captured.returncode, "elapsed_seconds": captured.elapsed_seconds, "stdout": captured.stdout, "stderr": captured.stderr}
+    if captured.failure == "output_limit":
+        raise Problem("渲染输出达到字节限额", "render_output_limit", 422, {**record, "output_limit_bytes": output_limit_bytes})
+    if captured.failure == "timeout":
+        raise Problem("渲染进程超时", "render_timeout", 504, {**record, "timeout": timeout, "stdout": captured.stdout[-8000:], "stderr": captured.stderr[-8000:]})
+    if captured.failure == "incomplete_output":
+        raise Problem("渲染进程退出后仍有后代占用输出管道", "render_output_incomplete", 422, record)
+    require(captured.returncode == 0, "渲染进程失败", "render_failed", 422, record)
     return record
 
 
@@ -477,7 +475,7 @@ class ArtifactEngine:
     def _publish(self, obj, work, value, primary, provenance=None):
         from .generation_validity import ensure_deliverable
         ensure_deliverable(self.store,obj)
-        provenance = {"object_id": obj.get("id"), "revision": obj.get("revision"), "kind": obj["kind"], "source_sha256": digest(obj), **(provenance or {}), "runtime": value.get("runtime", {}), "renderer_sha256": hashlib.sha256(Path(__file__).with_name("render_worker.py").read_bytes()).hexdigest(), "process": value.get("process", {}), "script_stdout": value.get("script_stdout", ""), "verification": "generated; requires visual/scientific review"}
+        provenance = {"object_id": obj.get("id"), "revision": obj.get("revision"), "kind": obj["kind"], "source_sha256": digest(obj), **(provenance or {}), "runtime": value.get("runtime", {}), "renderer_sha256": hashlib.sha256(Path(__file__).with_name("render_worker.py").read_bytes()).hexdigest(), "process": value.get("process", {}), "script_stdout": value.get("script_stdout", ""), "script_stderr": value.get("script_stderr", ""), "verification": "generated; requires visual/scientific review"}
         assets = {}
         renderer = self.store.add_asset(Path(__file__).with_name("render_worker.py").read_bytes(), "render_worker.py", "text/x-python", {"project_id": obj.get("project_id"), "object_id": obj.get("id"), "revision": obj.get("revision"), "role": "renderer_source"})
         assets["render_worker.py"] = renderer
@@ -1097,7 +1095,7 @@ class ArtifactEngine:
                 if lower in sensitive or (lower == "authorization" and isinstance(item, str)):
                     omissions.append({"path": ".".join(path + (str(key),)), "reason": "credential_or_private_configuration"})
                     result[key] = "[excluded from handoff]"
-                elif lower in {"stdout", "stderr", "script_stdout"}:
+                elif lower in {"stdout", "stderr", "script_stdout", "script_stderr"}:
                     omissions.append({"path": ".".join(path + (str(key),)), "reason": "raw_execution_log_not_exported"})
                 else: result[key] = ArtifactEngine._portable_value(item, omissions, path + (str(key),))
             return result
@@ -1315,6 +1313,7 @@ class ArtifactEngine:
             worker_bytes = Path(__file__).with_name("render_worker.py").read_bytes()
             (package / "runtime/render_worker.py").write_bytes(worker_bytes)
             (package / "runtime/figure_interaction.py").write_bytes(Path(__file__).with_name("figure_interaction.py").read_bytes())
+            (package / "runtime/process_output.py").write_bytes(Path(__file__).with_name("process_output.py").read_bytes())
             (package / "runtime/docx_semantics41.py").write_bytes(Path(__file__).with_name("docx_semantics41.py").read_bytes())
             (package / "runtime/asset_references.py").write_bytes(bundle_reference_reader())
             (package / "replay.py").write_text(BUNDLE_REPLAY_SOURCE)
