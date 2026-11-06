@@ -15,6 +15,8 @@ from .app import App
 from .store import Problem, require, now
 from .authentication import token_fingerprint
 from .local_accounts import LocalAccounts
+from .action_contract import validate_action_request
+from .diagnostics import record_internal_error
 
 
 def serve(app: App, host="127.0.0.1", port=8877):
@@ -287,7 +289,7 @@ def serve(app: App, host="127.0.0.1", port=8877):
                         return self.send(200,(app.store.blobs/sha).read_bytes(),asset["media_type"],{"Content-Disposition":"inline; filename*=UTF-8''"+name,"Content-Security-Policy":policy})
                     if url.path == "/api/health": return self.send(200,{"ok":True,"implementation":app.loaded_implementation["digest"],"runtime":app.runner.status() if app.runner else None})
                 require(self.command == "POST" and url.path == "/api/action", "接口不存在", "not_found",404)
-                data = self.post_body(address)
+                data = validate_action_request(self.post_body(address))
                 principal = self.management_principal()
                 require('allowed_actions' not in principal or data.get('action') in principal['allowed_actions'], '此任务凭据没有该业务命令权限', 'forbidden', 403)
                 result=app.dispatch(data,scope,principal=principal)
@@ -295,8 +297,8 @@ def serve(app: App, host="127.0.0.1", port=8877):
             except Problem as e: return self.send(e.status,{"ok":False,"error":str(e),"code":e.code,"details":e.details})
             except (KeyError,ValueError,TypeError) as e: return self.send(400,{"ok":False,"error":"请求字段不完整或格式错误："+str(e),"code":"invalid"})
             except Exception as e:
-                # Internal paths and credential-bearing exception text never go to browsers.
-                return self.send(500,{"ok":False,"error":"操作失败，原内容仍保留", "code":"internal_error","exception_type":type(e).__name__})
+                error_id = record_internal_error(e)
+                return self.send(500,{"ok":False,"error":"操作失败，原内容仍保留", "code":"internal_error","exception_type":type(e).__name__,"error_id":error_id})
 
         do_GET=request
         do_POST=request

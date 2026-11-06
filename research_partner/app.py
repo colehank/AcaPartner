@@ -19,6 +19,7 @@ import zipfile
 from pathlib import Path
 from .store import Store, Problem, require, now, uid, digest, encoded
 from .source_identity import IDENTITY_SCOPE, source_files
+from .action_contract import validate_action_request
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -277,8 +278,14 @@ class App:
                                and stat.S_ISREG(entry.st_mode) and stat.S_IMODE(entry.st_mode)==0o600
                                and entry.st_uid==os.getuid() and 0<entry.st_size<=4096)
             except (OSError,ValueError,TypeError):pass
+            note = "配置可探测；实际调用状态见任务记录" if available else "缺少可用执行入口或凭据"
+            if p.get("transport") == "app_server_dynamic":
+                from .provider_availability import codex_dynamic_availability
+                availability = codex_dynamic_availability()
+                available = availability["available"]
+                note = availability["reason"]
             composition,composition_budget=self.figure_provider_capability(pid,p,available)
-            result.append({"supports_figure_composition":composition,"figure_composition_budget":composition_budget,"id": pid, "route": route, "model": p.get("model"), "available": available, "connected": False, "note": "配置可探测；实际调用状态见任务记录" if available else "缺少可用执行入口或凭据", "authorized": bool(p.get("authorized")), "supports_resume": route in {"codex", "deepseek_harness"} and p.get("transport") != "deepseek_harness_native"})
+            result.append({"supports_figure_composition":composition,"figure_composition_budget":composition_budget,"id": pid, "route": route, "model": p.get("model"), "available": available, "connected": False, "note": note, "authorized": bool(p.get("authorized")), "supports_resume": route in {"codex", "deepseek_harness"} and p.get("transport") not in {"deepseek_harness_native", "app_server_dynamic"}})
         return result
 
     def capabilities(self):
@@ -289,17 +296,19 @@ class App:
         return {"formats": formats, "agent": {"real_model_required": True, "template_fallback": False}, "client_verified": False}
 
     def dispatch(self, data, scope=None, *, principal=None):
-        self.store._file_scope.results={}
-        result=self._dispatch(data,scope,principal=principal)
-        files=getattr(self.store._file_scope,'results',{})
-        repairs={key:value for key,value in files.items() if value.get('status')=='repair_required'}
-        if repairs and isinstance(result,dict):
-            result={**result,'project_files':repairs}
+        with self.store.capture_file_results() as files:
+            result = self._dispatch(data, scope, principal=principal)
+        repairs = {
+            key: value for key, value in files.items()
+            if value.get("status") == "repair_required"
+        }
+        if repairs and isinstance(result, dict):
+            result = {**result, "project_files": repairs}
         return result
 
     def _dispatch(self, data, scope=None, *, principal=None):
-        require(isinstance(data, dict), "需要 JSON 对象")
-        action = data.get("action")
+        data = validate_action_request(data)
+        action = data["action"]
         if isinstance(action, str) and action.startswith('claim.'):
             from .claims import dispatch
             return dispatch(self, data, scope, principal)

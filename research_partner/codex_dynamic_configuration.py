@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 import tomllib
 
+from .provider_availability import require_codex_dynamic_available
 from .store import require, digest
 
 TRANSPORT = 'app_server_dynamic'
@@ -13,6 +14,7 @@ DISABLED = ('shell_tool', 'apps', 'multi_agent', 'browser_use', 'browser_use_ext
 
 
 def definition(config):
+    require_codex_dynamic_available()
     require(config.get('route')=='codex' and config.get('transport')==TRANSPORT
             and isinstance(config.get('model'), str) and config['model'],
             '原生动态工具需要明确的既有Codex模型与协议', 'provider_missing', 503)
@@ -37,6 +39,7 @@ def guard(task, config):
 
 
 def session_limits():
+    require_codex_dynamic_available()
     from .codex_dynamic_transport import validate_limits
     return validate_limits(max_messages=2048)
 

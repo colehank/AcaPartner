@@ -11,6 +11,7 @@ import stat
 import tempfile
 import threading
 import uuid
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -153,6 +154,19 @@ class Store:
                     reader.execute("ROLLBACK")
 
     @contextlib.contextmanager
+    def capture_file_results(self) -> Iterator[dict[str, dict]]:
+        """收集当前调用提交后的文件同步结果，嵌套调用仍归属外层请求。"""
+        previous = getattr(self._file_scope, "results", None)
+        results = {}
+        self._file_scope.results = results
+        try:
+            yield results
+        finally:
+            self._file_scope.results = previous
+            if previous is not None:
+                previous.update(results)
+
+    @contextlib.contextmanager
     def transaction(self):
         require(getattr(self._read_scope, "connection", None) is None,
                 "只读状态投影不能开启写事务", "read_only_snapshot", 409)
@@ -189,7 +203,10 @@ class Store:
             # or overwrite an externally edited project file.
             if c.project_sync_ids:
                 from .project_files import sync_after_commit
-                self._file_scope.results = sync_after_commit(self,c.project_sync_ids)
+                results = sync_after_commit(self, c.project_sync_ids)
+                captured = getattr(self._file_scope, "results", None)
+                if captured is not None:
+                    captured.update(results)
 
     @staticmethod
     def unpack(row):

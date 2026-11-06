@@ -13,6 +13,7 @@ import time
 import tomllib
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from .provider_availability import require_codex_dynamic_available
 from .store import Problem, require, now, digest
 
 
@@ -417,6 +418,8 @@ class Providers:
         old task or replace its original request ledger.
         """
         config=self.app.config.get('providers',{}).get(task['payload'].get('provider_id'),{})
+        if config.get('transport') == 'app_server_dynamic' or task['payload'].get('context', {}).get('figure_composition', {}).get('native_transport') == 'app_server_dynamic':
+            require_codex_dynamic_available()
         if config.get('transport')=='deepseek_harness_native' or task['payload'].get('context',{}).get('figure_composition',{}).get('native_transport')=='deepseek_harness_native':
             from .native_figure_provider import dispatch_continuity
             return dispatch_continuity(self,task,directory,config)
@@ -642,6 +645,8 @@ class Providers:
     def call(self, task, prompt, directory, run_process, resume=None):
         config = self.app.config.get("providers", {}).get(task["payload"].get("provider_id"))
         require(config, "没有配置所选模型路线", "provider_missing", 503)
+        if config.get('transport') == 'app_server_dynamic' or task['payload'].get('context', {}).get('figure_composition', {}).get('native_transport') == 'app_server_dynamic':
+            require_codex_dynamic_available()
         require(config.get("authorized"), "该模型路线尚未获准执行", "authorization_required", 403)
         route = config.get("route")
         if config.get('transport')=='deepseek_harness_native' or task['payload'].get('context',{}).get('figure_composition',{}).get('native_transport')=='deepseek_harness_native':

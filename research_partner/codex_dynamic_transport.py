@@ -12,11 +12,10 @@ import base64
 import hashlib
 import json
 import math
-import struct
 import time
 import uuid
 
-from tools.codex_thread_dispatch import AppServer
+from .provider_availability import require_codex_dynamic_available
 from .mcp_workbench import MAX_RESPONSE
 
 DEFAULT_MAX_MESSAGES = 256
@@ -86,112 +85,11 @@ def _loads(raw):
     return value
 
 
-class ManagedAppServerClient(AppServer):
-    """Existing Unix WebSocket framing, experimental initialize and aggregate cap.
+class ManagedAppServerClient:
+    """公共版本不提供私有 AppServer 连接协议，构造时明确拒绝。"""
 
-    Instantiation connects only to the existing managed socket. Neither import
-    nor construction starts a server or a native thread/turn. The task owner is
-    responsible for deciding when connection itself is authorized.
-    """
     def __init__(self, path=None, timeout=1.0, max_message_bytes=MAX_RESPONSE):
-        if not 0 < timeout <= 1 or type(max_message_bytes) is not int or not 1024 <= max_message_bytes <= MAX_RESPONSE:
-            raise ValueError('Short socket timeout and bounded message bytes required')
-        self.max_message_bytes = max_message_bytes
-        self.last_received_raw = None
-        self.receive_guard = None
-        self._frame = {}
-        self._fragments = bytearray()
-        self._fragment_started = False
-        self.initialization_trace = []
-        self._initializing = True
-        try:
-            super().__init__(path, timeout)
-        finally:
-            self._initializing = False
-
-    def _initialization_record(self, direction, raw):
-        if getattr(self, '_initializing', False):
-            if len(self.initialization_trace) >= 16 or sum(len(entry['raw_json'].encode()) for entry in self.initialization_trace) + len(raw) > 4*1024*1024:
-                raise DynamicTransportError('initialization_limit', 'Initialization wire evidence exceeded its bound')
-            self.initialization_trace.append({'direction': direction, 'raw_json': raw.decode('utf-8'),
-                                              'wall_timestamp': time.time(), 'sha256': _sha(raw)})
-
-    def send(self, value, opcode=1):
-        if opcode == 1:
-            self._initialization_record('out', _encoded(value))
-        return super().send(value, opcode)
-
-    def call(self, method, params):
-        if method == 'initialize':
-            params = copy.deepcopy(params)
-            params['capabilities'] = {**params.get('capabilities', {}), 'experimentalApi': True}
-        return super().call(method, params)
-
-    def settimeout(self, timeout):
-        self.socket.settimeout(timeout)
-
-    def set_receive_guard(self, guard):
-        self.receive_guard = guard
-
-    def exact(self, n):
-        # Existing framing buffer semantics, with checks even when a peer keeps
-        # streaming short chunks instead of timing out the socket.
-        while len(self.buffer) < n:
-            if self.receive_guard:
-                self.receive_guard()
-            chunk = self.socket.recv(max(4096, n-len(self.buffer)))
-            if not chunk:
-                raise EOFError('Managed WebSocket closed; native outcome is unknown')
-            self.buffer += chunk
-        value, self.buffer = self.buffer[:n], self.buffer[n:]
-        return value
-
-    def receive(self):
-        while True:
-            if self.receive_guard:
-                self.receive_guard()
-            # Persist each parsing stage across a short socket timeout; a partial
-            # payload must never be reinterpreted as a new WebSocket header.
-            if 'head' not in self._frame:
-                self._frame['head'] = self.exact(2)
-            a, b = self._frame['head']
-            opcode, n = a & 15, b & 127
-            if a & 0x70:
-                raise DynamicTransportError('invalid_frame', 'Unexpected WebSocket extension bits')
-            if 'length' not in self._frame:
-                self._frame['length'] = struct.unpack('!H', self.exact(2))[0] if n == 126 else struct.unpack('!Q', self.exact(8))[0] if n == 127 else n
-            n = self._frame['length']
-            if opcode in (8, 9, 10) and (not a & 128 or n > 125):
-                raise DynamicTransportError('invalid_frame', 'Invalid WebSocket control frame')
-            if n > self.max_message_bytes or opcode in (0, 1) and len(self._fragments) + n > self.max_message_bytes:
-                raise DynamicTransportError('message_limit', 'Fragment aggregate exceeds message byte limit')
-            if 'mask' not in self._frame:
-                self._frame['mask'] = self.exact(4) if b & 128 else None
-            mask = self._frame['mask']
-            raw = self.exact(n)
-            self._frame = {}
-            if mask:
-                raw = bytes(value ^ mask[i % 4] for i, value in enumerate(raw))
-            if opcode == 8:
-                raise EOFError('Managed WebSocket closed; native turn outcome is unknown')
-            if opcode == 9:
-                self.send(raw, 10)
-                continue
-            if opcode == 10:
-                continue
-            if opcode not in (0, 1) or opcode == 0 and not self._fragment_started or opcode == 1 and self._fragment_started:
-                raise DynamicTransportError('invalid_frame', 'Unexpected JSON continuation/text frame')
-            self._fragment_started = True
-            self._fragments.extend(raw)
-            if a & 128:
-                self.last_received_raw = bytes(self._fragments)
-                self._fragments = bytearray()
-                self._fragment_started = False
-                self._initialization_record('in', self.last_received_raw)
-                value = _loads(self.last_received_raw)
-                if not isinstance(value, dict):
-                    raise DynamicTransportError('invalid_message', 'Native message must be a JSON object')
-                return value
+        require_codex_dynamic_available()
 
 
 class NativeDynamicSession:

@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from datetime import datetime, timezone
 
+from .provider_availability import require_codex_dynamic_available
 from .store import require, Problem, digest, now
 from .codex_dynamic_configuration import guard, overrides, DISABLED, TRANSPORT, session_limits
 from .native_turn_budget import terminal_seconds, no_dispatch
@@ -63,6 +64,7 @@ def continuity(providers, task, directory):
 
 
 def call(providers, config, task, prompt, directory, resume):
+    require_codex_dynamic_available()
     from .providers import _native_write, _controlled_file
     from .codex_dynamic_tools import DynamicToolRouter
     from .codex_dynamic_transport import ManagedAppServerClient, NativeDynamicSession
