@@ -23,7 +23,10 @@ DISTRIBUTION_FILES = (
     'tools/start_local.py', 'tools/build.py', 'tools/install.py',
     'tests/__init__.py', 'tests/test_start_local.py', 'tests/test_http_auth.py',
     'tests/test_local_accounts_http.py', 'tests/test_package_freeze31.py',
-    'tests/test_public_distribution.py',
+    'tests/test_public_distribution.py', 'tests/http_fixture.py',
+    'tests/test_action_contract.py', 'tests/test_store_results.py',
+    'tests/test_render_output.py', 'tests/test_provider_availability.py',
+    'docs/backend-development.md', '.github/workflows/backend.yml',
     'development/core-generation-runtime.in', 'development/core-generation-runtime.lock',
     'development/core-generation-build.lock',
 )
