@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -11,41 +12,43 @@ from collections.abc import Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 MAINTAINED_MODULES = (
-    "research_partner/__main__.py",
-    "research_partner/app.py",
-    "research_partner/store.py",
-    "research_partner/server.py",
-    "research_partner/artifacts.py",
-    "research_partner/render_worker.py",
-    "research_partner/providers.py",
-    "research_partner/codex_dynamic_configuration.py",
-    "research_partner/codex_dynamic_provider.py",
-    "research_partner/codex_dynamic_transport.py",
-    "research_partner/action_contract.py",
-    "research_partner/contracts.py",
-    "research_partner/diagnostics.py",
-    "research_partner/process_output.py",
-    "research_partner/provider_availability.py",
-    "research_partner/command_routing.py",
-    "research_partner/command_objects.py",
-    "research_partner/command_reviews.py",
-    "research_partner/command_assets.py",
-    "research_partner/command_tasks.py",
-    "research_partner/command_workspace.py",
-    "research_partner/object_policies.py",
-    "research_partner/http_boundary.py",
-    "research_partner/render_contract.py",
-    "tools/check_backend.py",
+    "src/research_partner/__main__.py",
+    "src/research_partner/app.py",
+    "src/research_partner/storage/store.py",
+    "src/research_partner/http/server.py",
+    "src/research_partner/rendering/engine.py",
+    "src/research_partner/rendering/worker.py",
+    "src/research_partner/providers/registry.py",
+    "src/research_partner/providers/codex_configuration.py",
+    "src/research_partner/providers/codex_dynamic.py",
+    "src/research_partner/providers/codex_transport.py",
+    "src/research_partner/commands/contract.py",
+    "src/research_partner/contracts",
+    "src/research_partner/execution/diagnostics.py",
+    "src/research_partner/execution/process_output.py",
+    "src/research_partner/providers/availability.py",
+    "src/research_partner/commands/routing.py",
+    "src/research_partner/commands/objects.py",
+    "src/research_partner/commands/reviews.py",
+    "src/research_partner/commands/assets.py",
+    "src/research_partner/commands/tasks.py",
+    "src/research_partner/commands/workspace.py",
+    "src/research_partner/storage/policies.py",
+    "src/research_partner/http/boundary.py",
+    "src/research_partner/rendering/contract.py",
+    "src/research_partner/resources/__init__.py",
+    "src/research_partner/packaging/identity.py",
+    "tools",
     "tests",
 )
 TYPED_BOUNDARIES = (
-    "research_partner/contracts.py",
-    "research_partner/action_contract.py",
-    "research_partner/provider_availability.py",
-    "research_partner/process_output.py",
-    "research_partner/render_contract.py",
-    "research_partner/http_boundary.py",
-    "research_partner/object_policies.py",
+    "src/research_partner/contracts",
+    "src/research_partner/commands/contract.py",
+    "src/research_partner/providers/availability.py",
+    "src/research_partner/execution/process_output.py",
+    "src/research_partner/rendering/contract.py",
+    "src/research_partner/http/boundary.py",
+    "src/research_partner/storage/policies.py",
 )
 
 
@@ -58,7 +61,7 @@ def commands(check: str) -> tuple[tuple[str, ...], ...]:
                 "check",
                 "--select",
                 "E9,F63,F7,F82",
-                "research_partner",
+                "src/research_partner",
                 "tools",
                 "tests",
             ),
@@ -105,8 +108,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         default="all",
     )
     args = parser.parse_args(argv)
+    environment = os.environ.copy()
+    # 所有子检查统一优先使用本次源码树，避免误导入机器上旧的安装包。
+    environment["PYTHONPATH"] = os.pathsep.join(
+        [str(ROOT / "src"), environment.get("PYTHONPATH", "")]
+    ).rstrip(os.pathsep)
     for command in commands(args.check):
-        result = subprocess.run((sys.executable, *command), cwd=ROOT, check=False)
+        result = subprocess.run(
+            (sys.executable, *command), cwd=ROOT, env=environment, check=False
+        )
         if result.returncode:
             return result.returncode
     return 0

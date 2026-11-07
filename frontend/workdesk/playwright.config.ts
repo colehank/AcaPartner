@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'tests',timeout:90000,workers:1,use:{baseURL:process.env.W1A_BASE_URL||'http://127.0.0.1:8920',viewport:{width:1440,height:950},actionTimeout:10000,trace:'off',screenshot:'only-on-failure'},outputDir:'../../.private/w1a/browser-results',reporter:[['list'],['json',{outputFile:'../../.private/w1a/evidence/browser-selftest.json'}]]});

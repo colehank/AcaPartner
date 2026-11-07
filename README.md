@@ -20,16 +20,16 @@ python3 tools/start_local.py
 python3 tools/start_local.py --data-dir /your/private/acapartner --port 8877
 ```
 
-发布包包含前端构建。若从仅有源码的版本开始，需要 Node.js 22.12+，先在 `frontend` 运行：
+发布包包含前端构建。若从仅有源码的版本开始，需要 Node.js 22.12+，先在 `frontend/workdesk` 运行：
 
 ```sh
 npm ci
 npm run build -- --configLoader runner
 ```
 
-更多说明：[快速开始](docs/quickstart.md) · [工作桌使用指南](docs/user-guide.md)。
+更多说明：[快速开始](docs/user/quickstart.md) · [工作桌使用指南](docs/user/user-guide.md)。
 
-![页面使用引导，基于合成空白项目的实际界面](docs/screenshots/workspace-guide.png)
+![页面使用引导，基于合成空白项目的实际界面](docs/user/screenshots/workspace-guide.png)
 
 ## 在工作桌里做什么
 
@@ -60,10 +60,20 @@ npm run build -- --configLoader runner
 
 ## 开发与发行
 
-后端是 Python 标准库实现，前端使用 React、Dockview、CodeMirror 与 ProseMirror。前端锁文件在 `frontend/package-lock.json`。测试和发布包含范围见 [发布说明](docs/RELEASE.md)。
+后端是 Python 标准库实现，前端使用 React、Dockview、CodeMirror 与 ProseMirror。前端锁文件在 `frontend/workdesk/package-lock.json`。测试和发布包含范围见 [发布说明](docs/release/RELEASE.md)。
 
-仓库提供产品源码、前端构建、可分发字体和许可证及自包含测试。**不包含**使用者项目、科研数据、模型凭据、本机账号、内部运行台账、历史验收材料或旧开发 Git 历史。公开版本不改变原项目已有证据或验收结论。
+仓库提供产品源码、可分发字体和许可证及自包含测试；发行包另外包含已构建页面。**不包含**使用者项目、科研数据、模型凭据、本机账号、内部运行台账、历史验收材料或旧开发 Git 历史。公开版本不改变原项目已有证据或验收结论。
+
+### 在哪里修改
+
+- Python 应用：`src/research_partner/`，按命令、存储、HTTP、渲染、执行与业务领域分包。
+- 当前前端：`frontend/workdesk/`；保留的兼容页面：`frontend/legacy/`。
+- 字体与 Agent 执行材料：`src/research_partner/resources/`。
+- 外部集成：`integrations/`；可选科学运行时清单：`environments/`。
+- 构建页面输出到 `build/frontend/workdesk/`，打包时装配，不手工修改或提交生成文件。
+
+开发 Python 前先执行 `python -m pip install -e '.[dev]'`，质量检查使用 `python tools/check_backend.py all`。完整职责和迁移说明见 [仓库结构](docs/architecture/repository-layout.md) 与 [后端开发](docs/development/backend-development.md)。
 
 ## 许可证
 
-主项目使用 [MIT](LICENSE)。附带字体的许可证位于 `research_partner/fonts`；前端依赖声明及第三方许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+主项目使用 [MIT](LICENSE)。附带字体的许可证位于 `src/research_partner/resources/fonts`；前端依赖声明及第三方许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
