@@ -33,6 +33,12 @@ function commissionMemory(session:Session):Memory {
     subscribe(listener){memory.listeners.add(listener);return()=>{memory.listeners.delete(listener);};},snapshot:()=>memory.version};
   projects.set(session.project.id,memory);return memory;
 }
+/** Explicitly carry a discussion draft into an empty, unsent commission. */
+export function seedResearchCommission(session:Session,request:string){
+  const memory=commissionMemory(session),value=memory.value;
+  if(!request.trim()||value.form.request.trim()||value.accepted||value.busy||value.uncertain)return false;
+  memory.set({form:{...value.form,request},preview:null,consent:'',emptyConsent:''});return true;
+}
 const initial=():Form=>({request:'',additional:'',background:'',
   constraints:'读取采用的保存材料，保留来源和不确定性；不改原始数据，不启动新拟合或未经授权的服务。',
   acceptance:'形成可编辑成果，说明问题、证据、限制和下一步，进入审阅；不以模型返回代替验收。',

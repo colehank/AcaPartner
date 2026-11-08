@@ -1,0 +1,107 @@
+{
+  "synthetic": true,
+  "execution_kind": "actual_local_script_run",
+  "not_platform_task": true,
+  "started_utc": "2026-10-29T08:38:55.924916+00:00",
+  "finished_utc": "2026-10-29T08:38:59.803624+00:00",
+  "python": "3.14.6",
+  "packages": {
+    "numpy": "2.4.4",
+    "pandas": "3.0.2",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2",
+    "python-docx": "1.2.0"
+  },
+  "steps": [
+    {
+      "command": [
+        "python",
+        "scripts/01_simulate.py"
+      ],
+      "started_utc": "2026-10-29T08:38:55.925016+00:00",
+      "finished_utc": "2026-10-29T08:38:56.463584+00:00",
+      "exit_code": 0,
+      "stdout": "{\"synthetic\": true, \"samples\": 480, \"traces\": 40080, \"missing\": 4}",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "scripts/02_analyze.py"
+      ],
+      "started_utc": "2026-10-29T08:38:56.463619+00:00",
+      "finished_utc": "2026-10-29T08:38:57.292966+00:00",
+      "exit_code": 0,
+      "stdout": "{\"soft_boiled\": {\"joint\": 0, \"n\": 120, \"white\": 9.78, \"yolk\": 9.73}, \"hard_boiled\": {\"joint\": 8, \"n\": 120, \"white\": 9.8, \"yolk\": 1.66}, \"sous_vide\": {\"joint\": 0, \"n\": 120, \"white\": 5.59, \"yolk\": 7.5}, \"periodic\": {\"joint\": 45, \"n\": 120, \"white\": 9.74, \"yolk\": 8.26}}",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "scripts/03_plot.py"
+      ],
+      "started_utc": "2026-10-29T08:38:57.292995+00:00",
+      "finished_utc": "2026-10-29T08:38:59.024170+00:00",
+      "exit_code": 0,
+      "stdout": "{\"figures\": 4, \"synthetic\": true, \"formats\": [\"png\", \"svg\", \"pdf\"], \"reference_eggs\": {\"soft_boiled\": \"EGG-0018\", \"hard_boiled\": \"EGG-0048\", \"sous_vide\": \"EGG-0078\", \"periodic\": \"EGG-0108\"}}",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "scripts/04_write_paper.py"
+      ],
+      "started_utc": "2026-10-29T08:38:59.024208+00:00",
+      "finished_utc": "2026-10-29T08:38:59.788277+00:00",
+      "exit_code": 0,
+      "stdout": "{\"synthetic\": true, \"docx_bytes\": 1076449, \"paper_chars\": 4352}",
+      "stderr": "/Users/zgh/Desktop/working/AcaPartner/examples/scientific-egg/scripts/04_write_paper.py:124: UserWarning: style lookup by style_id is deprecated. Use style name as key instead.\n  style=template.styles[name];style.font.name='Arial';style.font.size=Pt(size);style.element.rPr.rFonts.set(qn('w:eastAsia'),'宋体')\n[WARNING] Could not load translations for zh-CN\n  data file translations/zh.yaml not found\n[WARNING] The term Abstract has no translation defined.\n[WARNING] The term Figure has no translation defined.\n[WARNING] The term Table has no translation defined.\n[WARNING] The term Figure has no translation defined.\n[WARNING] The term Table has no translation defined.\n[WARNING] The term Figure has no translation defined.\n[WARNING] The term Figure has no translation defined.\n"
+    }
+  ],
+  "inputs_sha256": {
+    "protocol.json": "bd25b0dd0468730cbcd08c466ba93d19ba877e5d1879eb463ec3ba3596f094aa",
+    "scripts/01_simulate.py": "256ca2c68cea8856b87a3f9f836c5fde62fcddffb4ca0e95f068379baffd3afc",
+    "scripts/02_analyze.py": "f6c40fea37ff4c83af125296fae94f34ce913c4c49d075cfff06845c5e825e41",
+    "scripts/03_plot.py": "a54a54dd882eed1409cb279f9355683e2b332d333f165d1acc2306fd4fa67551",
+    "scripts/04_write_paper.py": "133559acfa51ff999afb7f62c97a7d11df2ad89ce58e11444d47d141ef5fe4a7"
+  },
+  "outputs_sha256": {
+    "data/data_dictionary.json": "c3a83d88d6a978810431a11653dfc59629155af302b124de632c48eef58a4d42",
+    "data/observations.csv": "41949a69dae3a717a62ad98bcf88c2ab27b24425a6ef993f3ac0b025f788df60",
+    "data/temperature_traces.csv": "9fa0753208694b1df4171e87e05c69135f72e32967f14ca46620198d071c17cb",
+    "results/batch_summary.csv": "8a227736a90aa7cea244696b012a4a93266ea3f6743f8dec025ef8a11155335c",
+    "results/classified_samples.csv": "1c2aa9c1fecb27a1720ce2be00afbbc9da6ad4829d1713bd7e74ee82b667768a",
+    "results/condition_summary.csv": "fe12f3976a358430e2537f1f6273b9d6eb10f25757b686f97b18da592b2ea782",
+    "results/method_summary.csv": "ffddd8e374bff9b3d29ee6246045aca53046339a0f13cfbd3e00f4e6a499f7d2",
+    "results/quality_checks.json": "7da059064acdfde5fefb7898b40b97c2ff3f18e4a85fe28d3bc3012109f77a27",
+    "results/summary.json": "bf87ebb4720fe662a17f5f1c3426ef5310cc3785122d4ea63d2edf594de0a392",
+    "results/threshold_sensitivity.csv": "4020c9edc0076dedd466c84f5d4852086ee03b79640097ea777454b3d1636534",
+    "figures/fig1_thermal.alignment.json": "0327da2e51e762696a8d4fab31c9cd96d0d7aa406f17ab4975501db1e0f71ad0",
+    "figures/fig1_thermal.axes.json": "6b20ff052e863a82550b917a5cf65ffd8074c27e8e7913f8f7a16c7e331c8ec4",
+    "figures/fig1_thermal.pdf": "f242c378932fb4c3d093ea760cffd2620a88f2fb38bb288cf8b08e5f30dce7d8",
+    "figures/fig1_thermal.png": "b7ff2ecf72ae3935848452b08d78c71e8aaf58615af23b217eef75fe4e2879b9",
+    "figures/fig1_thermal.svg": "6d4658ef3fcbe4e1ba143d54f7446780189077d750d81860b9b1c2ee582a6d1c",
+    "figures/fig2_joint.alignment.json": "0327da2e51e762696a8d4fab31c9cd96d0d7aa406f17ab4975501db1e0f71ad0",
+    "figures/fig2_joint.axes.json": "6b20ff052e863a82550b917a5cf65ffd8074c27e8e7913f8f7a16c7e331c8ec4",
+    "figures/fig2_joint.pdf": "b2e80a2be4b2f1a5d618ddefd25221dd5f672670bd2d075e86a68864d7e9ec66",
+    "figures/fig2_joint.png": "ea8836670fa2162913032c06ddce93c0f1a98ae2e158ebda3844cb96764f34ef",
+    "figures/fig2_joint.svg": "bf6f3e1dcb51561735dade6ecbfa06cf96ba1a710560b143caa7ce732db45608",
+    "figures/fig3_robustness.alignment.json": "0327da2e51e762696a8d4fab31c9cd96d0d7aa406f17ab4975501db1e0f71ad0",
+    "figures/fig3_robustness.axes.json": "6b20ff052e863a82550b917a5cf65ffd8074c27e8e7913f8f7a16c7e331c8ec4",
+    "figures/fig3_robustness.pdf": "22ac8d5bdea78caa4cdc4a594d944867b8192156d2d68dc47ff7ad0b9c9e9b81",
+    "figures/fig3_robustness.png": "1e94607e175397b1feadef23b95d489eba1cdebaaae9044bbdedfb9701857d31",
+    "figures/fig3_robustness.svg": "9af8e496bc19d390b92382a1ec73ff9d1fff91cacef44dfc661c905f4f3e3f1a",
+    "figures/figS1_conditions.alignment.json": "0327da2e51e762696a8d4fab31c9cd96d0d7aa406f17ab4975501db1e0f71ad0",
+    "figures/figS1_conditions.axes.json": "6b20ff052e863a82550b917a5cf65ffd8074c27e8e7913f8f7a16c7e331c8ec4",
+    "figures/figS1_conditions.pdf": "745db466366d0e8f61b6eed010f1e168c51364f09f760f39fb6d45c1185f95b3",
+    "figures/figS1_conditions.png": "2ea27f4622ad29bed5dd047e6f2471348e1036c02b6fb510d58d1b45d5412c75",
+    "figures/figS1_conditions.svg": "dc861a236580c2e15c7fa365c7a0cbf5b819dc2e376071f5b68384882179f60f",
+    "figures/reference_eggs.json": "3177ccdfd15af5635fbc6b7ee2c78bee0f33d7c43ce70275e41f422d824f8da2",
+    "manuscript/captions.json": "8e9a870ac0de1ab696f7288a7d7ab13e212e5baf9105cf285853afa8a1e7af18",
+    "manuscript/paper.docx": "79249966f5c280feae36315bce85a67dd80508d3cf05e5846f06d0482ecce287",
+    "manuscript/paper.md": "aea4c6dedc619c3980cbba1107a0ee9d27e45491ae450eb22a15ecc7fd2ba85e",
+    "manuscript/paper.tex": "899dda3d126fddcba8fc0b6f22b9668cbb2cfea5705b34f3766b33a062ce0698",
+    "manuscript/reference.docx": "3617d9398ca3613d0da62732cb2331039b0834f7648218be0cecabecc693583b"
+  },
+  "scope": "Actual generated data and local computation; no laboratory experiment, model invocation or platform task-runner event is claimed."
+}

@@ -152,6 +152,9 @@ def dispatch(app, data, scope, principal=None):
     require(data.get('action') in {'manuscript.format.render', 'manuscript.format.source'}, '排版动作不支持')
     base = app.writable(data.get('object_id'), scope)
     app.writable(base['id'], authority_scope(app, principal))
+    require(base['content'].get('paper_source_mode') not in {'latex', 'univer', 'docx'},
+            '当前论文采用原生源稿，请在原生论文编辑器中渲染；保留结构稿未用于替代当前源。',
+            'document_adapter_required', 409)
     projected = render_source(app, data, scope)
     obj = projected['object']
     require(obj['kind'] in {'report', 'note', 'paper', 'workshop_note'}, '需要文稿')

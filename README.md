@@ -14,7 +14,7 @@ python3 tools/start_local.py
 
 打开启动输出的本机地址（默认 `http://127.0.0.1:8877`）。首次点 **注册本地账号** 设置用户名和密码，以后直接登录。项目与账号默认保存在用户主目录的私有数据目录，源码升级不会覆盖它们。不要把该数据目录上传 GitHub。
 
-第一次进入项目时可选择 **开始引导** 或 **稍后再看**；之后从工作桌 **使用引导** 随时重开。引导逐步介绍真实模块，只有点击“打开此模块”才导航，不自动提交意见、启动模型、重算或编译。
+首页使用统一科研工作台，从项目导航进入研究、笔记和论文。
 
 ```sh
 python3 tools/start_local.py --data-dir /your/private/acapartner --port 8877
@@ -27,25 +27,24 @@ npm ci
 npm run build -- --configLoader runner
 ```
 
-更多说明：[快速开始](docs/quickstart.md) · [工作桌使用指南](docs/user-guide.md)。
+更多说明：[快速开始](docs/quickstart.md) · [当前工作台指南](docs/workbench-guide.md) · [文档总览](docs/README.md)。
 
-![页面使用引导，基于合成空白项目的实际界面](docs/screenshots/workspace-guide.png)
 
 ## 在工作桌里做什么
 
+当前工作台覆盖项目、研究、笔记和原生论文。
+
 | 模块 | 用途 |
 | --- | --- |
-| 项目与工作桌 | 切换项目、停靠面板，保留草稿与工作位置 |
-| 连续稿件 | 阅读、直接修改文字、查看修订和真实选区批注 |
-| 整轮意见 | 自主编辑、删除或恢复意见；整理后再明确提交和决定候选 |
-| 科研图 | 选择图位/元素组、调整布局；区分草稿、保存版和稿内固定引用 |
-| 数据与生成 | 查看数据、代码、参数、结果和依赖，按已配置环境计划重做 |
-| 原生笔记 | 每项目 Markdown、目录、检索、历史和来源引用 |
-| 研究委托与有限协作 | 明确材料、目标和预算，查看任务、候选和问题 |
-| 问题与证据 / Claim | 查看问题、证据与稿件主张之间的关系 |
-| 论文 PDF | 编译保存稿、查看当前修订，下载实际产物 |
+| 项目与研究 | 项目导航、背景、并列和递归 Q，各自的 QAEC |
+| 原生论文 | SuperDoc DOCX 编辑、批注和修订；独立 LaTeX 与 PDF 预览 |
+| 笔记和文件 | 原生 Markdown、文件读取、固定来源与版本 |
+| 委托与任务 | 复用已配置路线、授权和任务读取；实时对话尚未接通 |
+| Agent 文件交接 | 准备隔离工作副本，按基础修订提交，保护未保存草稿 |
 
-**保存有不同含义：**“草稿已同步”保存工作状态，“保存文字/保存笔记”保存对应内容；PDF 需要另行编译；图形预览和采用也是不同动作。引导会逐步说明。
+服务首页 `/` 现在直接打开统一科研工作台：主页、研究结构/文件目录、笔记、委托与原生论文共用同一套三栏界面。`/workdesk/editors.html?project=项目ID` 是同一工作台的论文直达入口；从“交付”打开真实项目论文。论文绑定一份主源，打开时自动进入对应编辑器；其他 DOCX/LaTeX 在文件树和独立标签中分别编辑。保存或编译只更新该文件，更换主源通过明确的“设为论文源稿”，不自动转换内容。DOCX 统一使用 SuperDoc 在浏览器内上传、编辑、修订、批注、保存和下载；没有批注等审阅内容时不预留右侧空列，纸面按可用宽度缩放并居中。“打开”建立独立本地副本，不替换项目论文。SuperDoc / React 的 AGPL 与必需 DOCX Engine 的专有许可并存，当前是本机开发集成，生产或对外分发范围见[第三方声明](THIRD_PARTY_NOTICES.md#superdoc-文档编辑依赖)。Agent 可用普通文件工具编辑工作副本后，经版本检查提交回项目。旧 Univer 数据保留并可下载。接入方式与边界见[文档适配记录](docs/architecture/document-adapters.md)。
+
+完整示例见[科学煮蛋](examples/scientific-egg/README.md)：480枚合成样本、7个父子研究问题、实际运行的分析与绘图脚本、4张图及带表格和公式的中文文章。可重建全部结果，再通过现有接口导入工作台，沿问题→数据→代码→证据→论文浏览；DOCX与LaTeX分别保存。模拟数据、实际本机计算与尚未提交的Agent工作明确区分。
 
 ## 可选运行时与限制
 
@@ -56,14 +55,18 @@ npm run build -- --configLoader runner
 - 生成链：与锁定版本及安装记录匹配的 Snakemake 环境。
 - Agent：已有提供者适配、明确凭据、授权材料和有限预算；本地账号不等于模型服务账号。
 
-本预览不承诺完整科学质量、Windows 原生输入/打印、参考硬件性能、所有来源变体或完整 W4/W5 交付。完整范围保留在[产品书](docs/product/current-20261010/Research_Partner_产品书.md)、[功能清单](docs/product/04_全量功能清单.json)和[场景](docs/product/09_验收场景.md)。
+本预览不承诺完整科学质量、Windows 原生输入/打印、参考硬件性能、所有来源变体或完整 W4/W5 交付。产品方向、领域词义和工程边界见[文档入口](docs/README.md)。
 
 ## 开发与发行
 
-后端是 Python 标准库实现，前端使用 React、Dockview、CodeMirror 与 ProseMirror。前端锁文件在 `frontend/package-lock.json`。测试和发布包含范围见 [发布说明](docs/RELEASE.md)。
+后端是 Python 标准库实现，前端使用 React、Dockview、CodeMirror 与 SuperDoc。前端锁文件在 `frontend/package-lock.json`。测试和发布包含范围见 [发布说明](docs/RELEASE.md)。
 
 仓库提供产品源码、前端构建、可分发字体和许可证及自包含测试。**不包含**使用者项目、科研数据、模型凭据、本机账号、内部运行台账、历史验收材料或旧开发 Git 历史。公开版本不改变原项目已有证据或验收结论。
 
 ## 许可证
 
 主项目使用 [MIT](LICENSE)。附带字体的许可证位于 `research_partner/fonts`；前端依赖声明及第三方许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+## 文档维护
+
+产品上下文、领域词表、设计规范、实现记录和原始资料统一从 [docs/README.md](docs/README.md) 阅读，正文集中在 docs。根目录的 AGENTS.md 仅提供开发规则与文档导航。

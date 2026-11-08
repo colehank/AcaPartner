@@ -213,7 +213,7 @@ class StartLocal(unittest.TestCase):
         with mock.patch.object(Path, 'home', return_value=Path('/example/home')), \
                 mock.patch.object(sys, 'platform', 'linux'), mock.patch.dict(os.environ, {'XDG_DATA_HOME': ''}):
             self.assertEqual(self.tool.default_data_dir(), Path('/example/home/.local/share/research-partner'))
-        with mock.patch.dict(os.environ, {'XDG_DATA_HOME': str(self.root / 'xdg')}):
+        with mock.patch.object(sys, 'platform', 'linux'), mock.patch.dict(os.environ, {'XDG_DATA_HOME': str(self.root / 'xdg')}):
             self.assertEqual(self.tool.default_data_dir(), self.root / 'xdg/research-partner')
         with mock.patch.object(Path, 'home', return_value=Path('/example/home')), mock.patch.object(sys, 'platform', 'darwin'):
             self.assertEqual(self.tool.default_data_dir(), Path('/example/home/Library/Application Support/Research Partner'))

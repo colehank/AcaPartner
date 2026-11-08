@@ -3,6 +3,7 @@ __pycache__/
 node_modules/
 .private/
 .runtime/
+/.code-review-graph/
 .venv/
 dist/
 .env
@@ -16,3 +17,21 @@ accounts.json
 account.json
 credentials.json
 config.local.json
+
+# Local OS / Python installation metadata
+.DS_Store
+*.egg-info/
+.pytest_cache/
+
+# Browser test output (the configured .private/ output is already ignored)
+/frontend/playwright-report/
+/frontend/test-results/
+
+# Optional design-tool output is local; canonical design documentation is in docs/.
+/.impeccable/
+
+# Reproducible archive; its source data, figures and manuscripts stay versioned.
+/examples/scientific-egg/scientific-egg-reproducible.zip
+
+# Do not blanket-ignore research_partner/web/workdesk/:
+# the current Python distribution includes that prebuilt UI.

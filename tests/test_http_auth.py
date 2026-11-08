@@ -71,6 +71,15 @@ class BrowserSessionHTTP(unittest.TestCase):
         self.assertIn('Path=/', cookie); self.assertNotIn(token, cookie + json.dumps(value))
         return cookie.split(';', 1)[0]
 
+    def test_local_graph_worker_allows_wasm_without_javascript_eval(self):
+        status, headers, _ = self.request('/')
+        self.assertEqual(status, 200)
+        policy = headers['Content-Security-Policy']
+        script = next(p.strip() for p in policy.split(';') if p.strip().startswith('script-src '))
+        self.assertEqual(script, "script-src 'self' 'wasm-unsafe-eval'")
+        self.assertNotIn("'unsafe-eval'", policy)
+        self.assertIn("worker-src 'self' blob:", policy)
+
     def test_real_cookie_scope_rotation_revocation_and_logout(self):
         self.assertEqual(self.request('/')[0], 200)
         self.assertEqual(self.request('/app.js')[0], 200)

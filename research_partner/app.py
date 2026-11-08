@@ -300,6 +300,30 @@ class App:
     def _dispatch(self, data, scope=None, *, principal=None):
         require(isinstance(data, dict), "需要 JSON 对象")
         action = data.get("action")
+        if isinstance(action, str) and action.startswith('workbench.graph.'):
+            from .research_graph import dispatch
+            return dispatch(self, data, scope, principal)
+        if action in {'workbench.node.save', 'workbench.root.set'}:
+            from .research_nodes import dispatch
+            return dispatch(self, data, scope, principal)
+        if isinstance(action, str) and action.startswith('workbench.progress.'):
+            from .research_progress import dispatch
+            return dispatch(self, data, scope, principal)
+        if isinstance(action, str) and action.startswith('research.partner.'):
+            from .project_partner import dispatch
+            return dispatch(self, data, scope, principal)
+        if isinstance(action, str) and action.startswith('research.work.'):
+            from .research_work import dispatch
+            return dispatch(self, data, scope, principal)
+        if isinstance(action, str) and action.startswith('research.exploration.'):
+            from .research_exploration import dispatch
+            return dispatch(self, data, scope, principal)
+        if isinstance(action, str) and action in {'workbench.research.read', 'workbench.question.create', 'workbench.question.save', 'workbench.background.save'}:
+            from .workbench_research import dispatch
+            return dispatch(self, data, scope, principal)
+        if isinstance(action, str) and action.startswith('document.'):
+            from .documents import dispatch
+            return dispatch(self, data, scope, principal)
         if isinstance(action, str) and action.startswith('claim.'):
             from .claims import dispatch
             return dispatch(self, data, scope, principal)
@@ -635,7 +659,7 @@ class App:
         project, materials, material_resolution = prepare_submission(self,data,scope,connection)
         kind = data.get("kind", "workshop" if data["action"] == "workshop.submit" else "research")
         require(kind != 'figure_composition' or isinstance(domain_context, dict), '领域工具任务只能通过固定组成委托入口创建', 'forbidden', 403)
-        require(kind not in {"literature_acquisition","growth_assessment","project_management","manuscript_revision"}, "此任务类型只能通过对应的有限委托入口创建", "forbidden", 403)
+        require(kind not in {"literature_acquisition","growth_assessment","project_management","manuscript_revision","research_exploration","research_work","research_partner"}, "此任务类型只能通过对应的有限委托入口创建", "forbidden", 403)
         request = data.get("request", data.get("prompt", ""))
         from .acquisition import plan as acquisition_plan
         literature_plan = acquisition_plan(data) if kind != "workshop" else None
@@ -1050,7 +1074,7 @@ def restore_workspace(archive, destination):
         # must be issued again on this instance. Match literal prefixes.
         for (key,) in c.execute("SELECT key FROM kv").fetchall():
             if key.startswith(("execution:", "code_grant:", "extension_grant:", "project_management:grant:",
-                               "generation_grant:", "manuscript_revision:grant:")):
+                               "generation_grant:", "manuscript_revision:grant:", "research_exploration:grant:", "research_work:grant:", "research_partner:grant:")):
                 c.execute("DELETE FROM kv WHERE key=?", (key,))
         registry=store.setting('extension_registry',{})
         for entry in registry.values():

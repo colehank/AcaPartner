@@ -1,0 +1,19 @@
+{
+  "disclosure": "All values are synthetic. Texture indices are arbitrary proxies, not calibrated gelation or food-safety measures.",
+  "sample_unit": "one simulated egg; white/yolk paired by sample_id",
+  "row_count": 480,
+  "missing_sample_ids": [
+    "EGG-0017",
+    "EGG-0146",
+    "EGG-0259",
+    "EGG-0443"
+  ],
+  "batch_unit": "four synthetic process groups; time points are not independent samples",
+  "columns": {
+    "white_index": "0-10; synthetic setting proxy; larger means firmer",
+    "yolk_index": "0-10; synthetic softness proxy; creamy target is an interval, not maximum softness",
+    "nominal_mass_g": "design stratum; actual mass has generated variation",
+    "protocol_deviation": "B04 periodic keeps total duration fixed but changes duty cycle; not excluded"
+  },
+  "generation_model": "dTw/dt=(Tb-Tw)/tau_w; dTy/dt=(Tw-Ty)/tau_y; accumulated exponential rate proxies; see protocol.json"
+}

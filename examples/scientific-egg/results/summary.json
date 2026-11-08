@@ -1,0 +1,163 @@
+{
+  "synthetic": true,
+  "seed": 20261029,
+  "criteria": {
+    "white_min": 7.5,
+    "yolk_min": 5.0,
+    "yolk_max": 8.5,
+    "bounds": "inclusive",
+    "unit": "arbitrary simulated texture index, 0-10"
+  },
+  "methods": {
+    "soft_boiled": {
+      "method": "soft_boiled",
+      "n_total": 120,
+      "n_assessable": 117,
+      "n_missing": 3,
+      "white_pass_n": 117,
+      "yolk_pass_n": 0,
+      "joint_pass_n": 0,
+      "joint_rate": 0.0,
+      "assessable_joint_rate": 0.0,
+      "wilson_low": 0,
+      "wilson_high": 0.031019166418703486,
+      "white_mean": 9.777999999999999,
+      "yolk_mean": 9.731358333333333
+    },
+    "hard_boiled": {
+      "method": "hard_boiled",
+      "n_total": 120,
+      "n_assessable": 120,
+      "n_missing": 0,
+      "white_pass_n": 120,
+      "yolk_pass_n": 8,
+      "joint_pass_n": 8,
+      "joint_rate": 0.06666666666666667,
+      "assessable_joint_rate": 0.06666666666666667,
+      "wilson_low": 0.03416530686090633,
+      "wilson_high": 0.12605130403530337,
+      "white_mean": 9.803891666666665,
+      "yolk_mean": 1.6552916666666666
+    },
+    "sous_vide": {
+      "method": "sous_vide",
+      "n_total": 120,
+      "n_assessable": 119,
+      "n_missing": 1,
+      "white_pass_n": 0,
+      "yolk_pass_n": 113,
+      "joint_pass_n": 0,
+      "joint_rate": 0.0,
+      "assessable_joint_rate": 0.0,
+      "wilson_low": 0,
+      "wilson_high": 0.031019166418703486,
+      "white_mean": 5.591865546218488,
+      "yolk_mean": 7.500308333333333
+    },
+    "periodic": {
+      "method": "periodic",
+      "n_total": 120,
+      "n_assessable": 120,
+      "n_missing": 0,
+      "white_pass_n": 120,
+      "yolk_pass_n": 45,
+      "joint_pass_n": 45,
+      "joint_rate": 0.375,
+      "assessable_joint_rate": 0.375,
+      "wilson_low": 0.29352429786446804,
+      "wilson_high": 0.4642304937402079,
+      "white_mean": 9.740616666666666,
+      "yolk_mean": 8.263816666666665
+    }
+  },
+  "batch_differences": [
+    {
+      "contrast": "periodic - soft_boiled",
+      "batch_differences": {
+        "B01": 0.16666666666666666,
+        "B02": 0.26666666666666666,
+        "B03": 0.06666666666666667,
+        "B04": 1.0
+      },
+      "mean_difference": 0.375,
+      "scope": "descriptive paired differences across four simulated batches, not real-world inference"
+    },
+    {
+      "contrast": "periodic - hard_boiled",
+      "batch_differences": {
+        "B01": 0.09999999999999999,
+        "B02": 0.23333333333333334,
+        "B03": -0.06666666666666667,
+        "B04": 0.9666666666666667
+      },
+      "mean_difference": 0.30833333333333335,
+      "scope": "descriptive paired differences across four simulated batches, not real-world inference"
+    },
+    {
+      "contrast": "periodic - sous_vide",
+      "batch_differences": {
+        "B01": 0.16666666666666666,
+        "B02": 0.26666666666666666,
+        "B03": 0.06666666666666667,
+        "B04": 1.0
+      },
+      "mean_difference": 0.375,
+      "scope": "descriptive paired differences across four simulated batches, not real-world inference"
+    }
+  ],
+  "paired_counts": {
+    "soft_boiled": {
+      "white_n": 117,
+      "yolk_n": 0,
+      "paired_joint_n": 0,
+      "n_total": 120
+    },
+    "hard_boiled": {
+      "white_n": 120,
+      "yolk_n": 8,
+      "paired_joint_n": 8,
+      "n_total": 120
+    },
+    "sous_vide": {
+      "white_n": 0,
+      "yolk_n": 113,
+      "paired_joint_n": 0,
+      "n_total": 120
+    },
+    "periodic": {
+      "white_n": 120,
+      "yolk_n": 45,
+      "paired_joint_n": 45,
+      "n_total": 120
+    }
+  },
+  "checks": {
+    "samples": 480,
+    "unique_ids": true,
+    "all_synthetic": true,
+    "missing_rows": [
+      "EGG-0017",
+      "EGG-0146",
+      "EGG-0259",
+      "EGG-0443"
+    ],
+    "excluded_rows": 0,
+    "group_sizes": {
+      "hard_boiled": 120,
+      "periodic": 120,
+      "soft_boiled": 120,
+      "sous_vide": 120
+    },
+    "joint_never_exceeds_either_margin": true,
+    "all_recorded_batches_present": true
+  },
+  "uncertainty": "95% Wilson intervals for descriptive egg-level rates under the synthetic generator. They ignore within-batch dependence and are not population validation; four batches are reported separately. No p-values or causal inference.",
+  "limitations": [
+    "two-node phenomenological model, not validated CFD",
+    "arbitrary uncalibrated texture indices",
+    "four generated batches, no actual experimental replication",
+    "missing rows retained; no imputation",
+    "B04 periodic duty-cycle deviation retained",
+    "thresholds chosen for demonstration, not food safety or preference recommendations"
+  ]
+}

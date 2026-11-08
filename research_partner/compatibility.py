@@ -77,6 +77,12 @@ def workspace_requirements(workspace):
         require({'kv','tasks'}<=tables,'研究空间数据库格式无法核对','compatibility_invalid',409)
         row=connection.execute('SELECT value FROM kv WHERE key=?',(FLOOR_KEY,)).fetchone()
         declared=feature_list(json.loads(row[0])) if row else [];inferred=set()
+        if 'objects' in tables and connection.execute("SELECT 1 FROM objects WHERE json_extract(metadata,'$.research_nodes') IS NOT NULL OR json_extract(metadata,'$.research_root_question_id') IS NOT NULL LIMIT 1").fetchone():
+            inferred.add('research_node_states_v1')
+        if 'objects' in tables and connection.execute("SELECT 1 FROM objects WHERE json_extract(metadata,'$.graph_node') IS NOT NULL OR json_extract(metadata,'$.research_graph_version')=2 LIMIT 1").fetchone():
+            inferred.add('free_research_graph_v2')
+        if 'objects' in tables and connection.execute("SELECT 1 FROM objects WHERE json_extract(metadata,'$.research_graph_question_model')='leaf_v1' LIMIT 1").fetchone():
+            inferred.add('leaf_research_questions_v1')
         for (raw,) in connection.execute('SELECT payload FROM tasks'):
             payload=json.loads(raw)
             require(isinstance(payload,dict),'任务数据无法核对','compatibility_invalid',409)
@@ -84,6 +90,9 @@ def workspace_requirements(workspace):
                 inferred.add('content_generation_plans_v1')
                 if payload.get('generation_plan',{}).get('shared_generation'):inferred.add('shared_generation_plans_v1')
             if payload.get('kind')=='project_management':inferred.add('reviewed_project_management_v1')
+            if payload.get('kind')=='research_partner':inferred.add('project_partner_v1')
+            if payload.get('kind')=='research_work':inferred.add('research_question_work_v1')
+            if payload.get('kind')=='research_exploration':inferred.add('research_exploration_v1')
             if payload.get('kind')=='manuscript_revision':
                 inferred.add('reviewed_manuscript_revision_v1')
                 if any(t.get('target', {}).get('field') == 'slot_layout' for t in payload.get('context', {}).get('manuscript_revision', {}).get('targets', [])):

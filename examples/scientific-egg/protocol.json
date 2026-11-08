@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "synthetic": true,
+  "seed": 20261029,
+  "description": "AcaPartner synthetic research demonstration; no physical experiments or paper data reused",
+  "batches": ["B01", "B02", "B03", "B04"],
+  "mass_groups_g": [50, 60, 70],
+  "initial_temperature_groups_c": [4, 22],
+  "replicates_per_cell": 5,
+  "time_step_s": 2,
+  "record_interval_s": 20,
+  "methods": {
+    "soft_boiled": {"label": "Soft-boiled", "duration_s": 360, "bath_c": 100},
+    "hard_boiled": {"label": "Hard-boiled", "duration_s": 720, "bath_c": 100},
+    "sous_vide": {"label": "Sous vide", "duration_s": 3600, "bath_c": 65},
+    "periodic": {"label": "Periodic", "duration_s": 1920, "hot_c": 100, "cool_c": 30, "half_cycle_s": 120}
+  },
+  "model": {
+    "white_tau_s": 66,
+    "yolk_tau_s": 270,
+    "white_rate_s": 0.0013,
+    "white_reference_c": 74,
+    "white_scale_c": 5.4,
+    "yolk_rate_s": 0.00027,
+    "yolk_reference_c": 70,
+    "yolk_scale_c": 5.2,
+    "measurement_sd": 0.35,
+    "batch_heat_shift_c": [-0.8, 0.6, -1.2, 1.6],
+    "batch_texture_shift": [0.0, -0.15, 0.1, -0.3]
+  },
+  "criteria": {"white_min": 7.5, "yolk_min": 5.0, "yolk_max": 8.5, "bounds": "inclusive", "unit": "arbitrary simulated texture index, 0-10"},
+  "missing_rule": "four fixed sample IDs have a missing white texture reading; retain rows, no imputation; all-randomized denominator is conservative",
+  "protocol_variation": "B04 periodic has a fixed 20 s extension per hot half-cycle within the fixed 32 min total; retain as a process deviation",
+  "literature_background": {"doi": "10.1038/s44172-024-00334-w", "url": "https://www.nature.com/articles/s44172-024-00334-w", "role": "protocol inspiration only; this two-node model is not the paper CFD or an empirical reproduction"}
+}

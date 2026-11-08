@@ -11,19 +11,28 @@ from pathlib import Path
 
 # Product sources are public; author-machine control and historical case records
 # are not part of an installation. This same allowlist is used for Git export.
-DISTRIBUTION_FOLDERS = ('research_partner', 'frontend/src', 'extensions', 'plugins')
+DISTRIBUTION_FOLDERS = ('research_partner', 'frontend/src', 'frontend/public',
+                        'tests/fixtures', 'tests/helpers', 'extensions', 'plugins')
 DISTRIBUTION_FILES = (
     'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'pyproject.toml', 'config.example.json',
-    'docs/user-guide.md', 'docs/quickstart.md', 'docs/RELEASE.md', 'docs/screenshots/workspace-guide.png',
-    'docs/product/current-20261010/Research_Partner_产品书.md',
-    'docs/product/04_全量功能清单.json', 'docs/product/09_验收场景.md',
-    'frontend/package.json', 'frontend/package-lock.json', 'frontend/index.html',
+    'AGENTS.md',
+    'docs/README.md', 'docs/workbench-guide.md', 'docs/quickstart.md', 'docs/RELEASE.md',
+    'docs/product/README.md', 'docs/product/glossary.md', 'docs/design-system.md',
+    'docs/research-workflow/README.md',
+    'docs/architecture/README.md', 'docs/architecture/document-adapters.md',
+    'docs/architecture/system-architecture-proposal.md',
+    'frontend/package.json', 'frontend/package-lock.json', 'frontend/index.html', 'frontend/editors.html',
     'frontend/vite.config.ts', 'frontend/tsconfig.json', 'frontend/playwright.config.ts',
-    'frontend/tests/local-account-login.spec.ts', 'frontend/tests/workspace-guide.spec.ts',
+    'frontend/tests/scientific-egg-reading.spec.ts', 'frontend/tests/tree-actions.spec.ts', 'frontend/tests/code-workspace.spec.ts', 'frontend/tests/document-interactions.spec.ts', 'frontend/tests/native-documents.spec.ts',
+    'frontend/tests/research-links.spec.ts', 'frontend/tests/superdoc-workspace.spec.ts',
+    'frontend/tests/research-progress.spec.ts', 'frontend/tests/project-partner.spec.ts', 'frontend/tests/research-work.spec.ts', 'frontend/tests/research-exploration.spec.ts', 'frontend/tests/unified-workbench.spec.ts', 'frontend/tests/workbench-recovery.spec.ts',
     'tools/start_local.py', 'tools/build.py', 'tools/install.py',
-    'tests/__init__.py', 'tests/test_start_local.py', 'tests/test_http_auth.py',
+    'tests/test_start_local.py', 'tests/test_http_auth.py',
     'tests/test_local_accounts_http.py', 'tests/test_package_freeze31.py',
     'tests/test_public_distribution.py',
+    'tests/test_runtime_processes.py',
+    'tests/test_research_nodes.py', 'tests/test_research_progress.py', 'tests/test_project_partner.py', 'tests/test_research_exploration.py', 'tests/test_research_work.py',
+    'tests/test_tree_actions.py', 'tests/test_editor_sources.py', 'tests/test_document_adapters.py', 'tests/test_workbench_research.py',
     'development/core-generation-runtime.in', 'development/core-generation-runtime.lock',
     'development/core-generation-build.lock',
 )

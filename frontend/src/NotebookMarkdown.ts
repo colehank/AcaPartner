@@ -1,5 +1,6 @@
 import MarkdownIt from 'markdown-it';
 import DOMPurify from 'dompurify';
+import {markdownParser} from './editors/markdown';
 import type {NotebookHeading} from './NotebookNavigator';
 
 /** Same safe Markdown/token-map contract as the native notebook reader.
@@ -43,7 +44,7 @@ export function renderNotebookMarkdown(markdown:string,path:string,headings:Note
       child.attrSet('target','_blank');child.attrSet('rel','noopener noreferrer');
     }
   }
-  const renderer=new MarkdownIt({html:false,linkify:false});
+  const renderer=markdownParser({linkify:false});
   renderer.renderer.rules.image=(items,i)=>`<span class="attachment">[图片：${renderer.utils.escapeHtml(items[i].content)}]</span>`;
   if(options.links===false){renderer.renderer.rules.link_open=()=>'<span>';renderer.renderer.rules.link_close=()=>'</span>';}
   return DOMPurify.sanitize(renderer.renderer.render(tokens,renderer.options,{}),{ALLOW_DATA_ATTR:true,ADD_ATTR:['target']});

@@ -733,6 +733,23 @@ class ArtifactEngine:
             return self._export(obj, format, authorized_code)
 
     def _export(self, obj, format, authorized_code=False):
+        if obj['kind'] == 'paper' and obj['content'].get('paper_source_mode') == 'latex':
+            require(format.lower().lstrip('.') in {'tex', 'bib', 'pdf', 'json', 'zip', 'bundle'},
+                    '当前论文源稿为 LaTeX；DOCX 跨格式转换尚未接通。已有 DOCX 文件可单独下载。',
+                    'document_adapter_required', 409)
+        if obj['kind'] == 'paper' and obj['content'].get('paper_source_mode') == 'docx':
+            fmt = format.lower().lstrip('.')
+            if fmt == 'docx':
+                asset = self.store.asset(obj['content']['docx_asset'])
+                return {'asset': asset, 'assets': {'manuscript.docx': asset}, 'files': [], 'warnings': [],
+                        'provenance': {'source_sha256': digest(obj), 'paper_source': {'mode': 'docx',
+                                       'revision': obj['revision'], 'docx_sha256': asset['sha']}}}
+            require(fmt in {'json', 'zip', 'bundle'}, '当前源为 DOCX；请下载原文件，其他格式尚未接通转换。',
+                    'document_adapter_required', 409)
+        if obj['kind'] == 'paper' and obj['content'].get('paper_source_mode') == 'univer':
+            require(format.lower().lstrip('.') in {'json', 'zip', 'bundle'},
+                    '当前源为 Univer 文稿；DOCX/PDF 导出需要文档转换服务，未从旧结构稿生成替代品。',
+                    'document_adapter_required', 503)
         from .generation_validity import ensure_deliverable
         ensure_deliverable(self.store,obj)
         from .figure_definition import require_complete

@@ -1,0 +1,19 @@
+{
+  "vscode_commit": "1306698e328e5e531f5e632301d30020aa994eff",
+  "seti_ui_license_commit": "2d6c5e68b4ded73c92dac291845ee44e1182d511",
+  "source": "https://github.com/microsoft/vscode/tree/1306698e328e5e531f5e632301d30020aa994eff/extensions/theme-seti",
+  "files": {
+    "extensions/theme-seti/icons/vs-seti-icon-theme.json": {
+      "sha256": "2088843e6f00a81870ed2890132fb658cf33406177a5dd58c9c7001e5184ca2a",
+      "bytes": 54732
+    },
+    "extensions/theme-seti/icons/seti.woff": {
+      "sha256": "b127762058f89b37b08d76185e3b0558f5c28859e39a3840a27cb28b9739d6e2",
+      "bytes": 37284
+    },
+    "LICENSE.txt": {
+      "sha256": "9480271317925265e806a9a196aaa33410a962fa9d4d1e248a4a5187bc8c9df9",
+      "bytes": 1088
+    }
+  }
+}

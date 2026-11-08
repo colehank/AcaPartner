@@ -1,7 +1,0 @@
-.review-location-topics { display:flex; gap:.4rem; flex-wrap:wrap; padding:.4rem .6rem; border-bottom:1px solid #d6dcdf; }
-.review-location-topics button { max-width:26rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-.review-panel article[aria-current="true"] { outline:2px solid #577c8b; outline-offset:2px; }
-
-.manuscript-caption-mark{background:rgba(240,200,60,.22);cursor:pointer}.manuscript-caption-mark[data-review-active="true"]{outline:2px solid currentColor;outline-offset:2px}
-
-.continuous-manuscript-document .manuscript-saved-figure figcaption,.manuscript-caption-mark{user-select:text}

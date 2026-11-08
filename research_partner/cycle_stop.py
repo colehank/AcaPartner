@@ -6,12 +6,12 @@ These records do not assert remote provider cancellation or fee settlement.
 """
 import json
 from pathlib import Path
-from .store import now
+from .store import now, Problem
 
 
 def _quiet_group(record):
-    """Conservative /proc observation of the exact locally registered group."""
-    from .runtime import process_identity
+    """Conservative platform-specific observation of the registered group."""
+    from .runtime import process_identity, process_group_members
     try:
         pid = record['pid']; owner = record['uid']; started = record['start_ticks']
         if type(pid) is not int or pid <= 0 or type(owner) is not int or owner < 0: return False
@@ -20,14 +20,8 @@ def _quiet_group(record):
         if current is not None:
             if any(str(current[k]) != str(record[k]) for k in ('pid', 'start_ticks', 'uid')): return False
             if current['state'] != 'Z': return False
-        for path in Path('/proc').iterdir():
-            if not path.name.isdigit(): continue
-            try:
-                stat = (path / 'stat').read_text().rsplit(')', 1)[1].split()
-                if int(stat[2]) == pid and int(stat[3]) == pid and stat[0] != 'Z': return False
-            except (FileNotFoundError, ProcessLookupError): continue
-        return True
-    except (OSError, KeyError, ValueError, TypeError, IndexError): return False
+        return not process_group_members(record)
+    except (Problem, OSError, KeyError, ValueError, TypeError, IndexError): return False
 
 
 def completion(runtime, ident, token):

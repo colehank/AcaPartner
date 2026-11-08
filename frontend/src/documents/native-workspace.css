@@ -1,0 +1,150 @@
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; margin: 0; }
+body { background: var(--surface-app); color: var(--text-primary); font: var(--text-base)/1.5 var(--font-ui); }
+::selection { background: var(--selection-ink); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.native-workbench { height: 100%; display: flex; flex-direction: column; }
+.native-panels { display: grid; grid-template-columns: 240px minmax(0, 1fr) 272px; gap: 6px; padding: 4px 4px 0; flex: 1; min-height: 0; }
+.native-panel { min-width: 0; min-height: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-md); }
+.native-side, .native-context { display: flex; flex-direction: column; background: var(--surface-nav); }
+.native-content { display: flex; flex-direction: column; background: var(--surface-editor); }
+.native-top { height: 40px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+.native-top strong { font-size: var(--text-base); font-weight: 600; }
+.native-icon { width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; flex: none; padding: 5px; border: 0; border-radius: var(--radius-sm); color: var(--text-secondary); background: transparent; text-decoration: none; cursor: pointer; }
+.native-icon svg, .native-button svg { width: 16px; height: 16px; flex: none; stroke-width: 1.5; }
+.native-icon:hover, .native-button:hover { background: var(--surface-hover); color: var(--text-primary); }
+.native-icon:disabled, .native-button:disabled { opacity: .5; cursor: default; }
+.native-project-row { height: 36px; flex: none; display: flex; align-items: center; padding: 0 8px; gap: 4px; }
+.native-project-row select { min-width: 0; flex: 1; border: 0; background: transparent; color: var(--text-primary); font: 600 var(--text-base)/1.5 var(--font-ui); text-overflow: ellipsis; }
+.native-tree-heading { display: flex; align-items: center; gap: 4px; padding: 12px 10px 4px; color: var(--text-secondary); }
+.native-tree-heading svg { width: 12px; height: 12px; }
+.native-paper-row { display: flex; align-items: center; gap: 6px; height: 26px; margin: 0 8px; padding: 0 20px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
+.native-paper-row.selected, .native-tree-row.selected { background: var(--selection); }
+.native-paper-row svg, .native-tree-row svg { width: 14px; height: 14px; flex: none; stroke-width: 1.5; }
+.native-file-tree { flex: 1; min-height: 0; margin: 0 6px; }
+.native-tree-row { display: flex; align-items: center; gap: 5px; padding-right: 6px; color: var(--text-secondary); cursor: pointer; border-radius: var(--radius-sm); }
+.native-tree-row > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-chevron { width: 12px; flex: none; display: flex; }
+.tree-chevron svg { width: 10px; }
+.native-side-link { padding: 14px; color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; }
+.native-side-link:hover { color: var(--accent); }
+.native-tabbar { min-height: 40px; display: flex; align-items: stretch; background: var(--surface-nav); overflow: hidden; flex: none; }
+.native-tab { display: flex; align-items: center; gap: 7px; min-width: 0; max-width: 240px; padding: 0 14px; border: 0; border-radius: var(--radius-md) var(--radius-md) 0 0; color: var(--text-secondary); background: transparent; font: inherit; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.native-tab:first-child { border-top-left-radius: 0; }
+.native-tab.active { color: var(--text-primary); background: var(--surface-editor); }
+.native-tab svg { width: 14px; height: 14px; flex: none; }
+.native-dirty { width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); }
+.native-toolbar { display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 5px 12px; flex: none; border-bottom: 1px solid var(--border-subtle); }
+.native-format { display: flex; padding: 2px; border-radius: var(--radius-sm); background: var(--surface-raised); }
+.native-format button { border: 0; padding: 3px 8px; background: transparent; color: var(--text-muted); border-radius: 3px; font: inherit; cursor: pointer; }
+.native-format button.active { background: var(--surface-editor); color: var(--text-primary); }
+.native-save-status { flex: 1; min-width: 0; color: var(--text-muted); font-size: var(--text-xs); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.native-button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 28px; padding: 4px 8px; flex: none; color: var(--text-secondary); background: transparent; border: 1px solid var(--border); border-radius: var(--radius-sm); font: var(--text-sm)/1.5 var(--font-ui); text-decoration: none; cursor: pointer; }
+.native-button.primary { background: var(--accent-solid); color: var(--on-accent); border-color: var(--accent-solid); }
+.native-source-note, .native-office-note { padding: 8px 16px; color: var(--text-muted); font-size: var(--text-sm); line-height: 1.7; flex: none; }
+.native-office-note { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; border-bottom: 1px solid var(--border-subtle); }
+.native-latex-split { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.native-latex-source, .native-pdf-preview { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.native-latex-source { border-right: 1px solid var(--border-subtle); }
+.native-editor-heading, .pdf-preview-status { min-height: 32px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 12px; color: var(--text-muted); font-size: var(--text-xs); background: var(--surface-toolbar); }
+.native-editor-heading span { color: var(--warning); }
+.pdf-preview-status a { color: var(--accent); text-decoration: none; }
+.native-source-file { flex: 1; min-height: 0; display: flex; }
+.native-path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.editor-host { flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
+.editor-host .cm-editor { height: 100%; background: var(--surface-editor); color: var(--text-primary); font: var(--text-base)/1.8 var(--font-code); }
+.editor-host .cm-scroller { font-family: var(--font-code); overflow: auto; }
+.editor-host .cm-gutters { background: var(--surface-editor); color: var(--text-muted); border: 0; }
+.editor-host .cm-content { padding: 16px 0; caret-color: var(--accent); }
+.editor-host .cm-line { padding: 0 12px; }
+.editor-host .cm-focused .cm-selectionBackground, .editor-host .cm-selectionBackground { background: var(--selection-ink); }
+.native-pdf-preview { background: var(--surface-nav); overflow: auto; }
+.native-pdf-pages { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 16px 0; }
+.native-pdf-pages:empty { padding: 0; }
+.native-pdf-pages canvas { background: white; display: block; }
+.editor-empty { margin: 0; padding: 32px 24px; color: var(--text-muted); line-height: 1.8; }
+.native-empty { margin: auto; padding: 32px; max-width: 560px; }
+.native-empty h1 { font-size: var(--text-heading); font-weight: 600; }
+.native-empty p { color: var(--text-secondary); font-size: var(--text-body); line-height: 1.8; }
+.office-editor-frame, .office-editor { flex: 1; min-height: 0; height: 100%; min-width: 0; overflow: hidden; }
+.office-editor-frame { color-scheme: light; color: var(--text-primary); background: var(--surface-editor); }
+.native-context-body { padding: 20px 18px; overflow: auto; }
+.native-context-body h2 { font-size: 17px; font-weight: 600; margin: 0 0 14px; }
+.native-context-body p { line-height: 1.8; color: var(--text-secondary); }
+.native-context-body dl { margin: 24px 0; }
+.native-context-body dt { font-size: var(--text-sm); color: var(--text-muted); margin-top: 16px; }
+.native-context-body dd { margin: 4px 0; overflow-wrap: anywhere; }
+.native-context-body .native-context-help { color: var(--text-muted); font-size: var(--text-sm); }
+.native-alert { margin: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 16px; max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--danger); background: var(--danger-bg); font-size: var(--text-sm); line-height: 1.7; }
+.native-statusbar { height: 26px; flex: none; display: grid; grid-template-columns: minmax(112px, 1fr) minmax(0, 2fr) minmax(112px, 1fr); gap: 8px; padding: 0 8px; align-items: center; color: var(--text-muted); font-size: var(--text-xs); }
+.native-statusbar button { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.native-status-connection { justify-self: start; white-space: nowrap; }
+.native-status-connection i { width: 5px; height: 5px; border: 1px solid var(--text-muted); border-radius: 50%; }
+.native-status-connection i.connected { background: var(--success); border-color: var(--success); }
+.native-address { text-align: center; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.native-status-right { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+.native-status-right .native-icon { width: 22px; height: 22px; padding: 4px; }
+.native-status-right svg { width: 14px; height: 14px; }
+.native-popover { position: fixed; inset: auto auto 30px 8px; margin: 0; max-width: calc(100vw - 16px); width: 320px; padding: 16px; border: 0; border-radius: var(--radius-md); box-shadow: var(--shadow); color: var(--text-primary); background: var(--surface-input); font: var(--text-base)/1.8 var(--font-ui); }
+.native-popover.right { left: auto; right: 8px; }
+.native-popover h2 { margin: 0 0 12px; font-size: 17px; font-weight: 600; }
+.native-popover p { color: var(--text-secondary); margin: 8px 0; }
+.native-popover a { color: var(--accent); }
+.modal-backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: #20212640; }
+.dialog { width: 440px; max-width: calc(100vw - 24px); max-height: calc(100vh - 24px); overflow: auto; padding: 24px; border-radius: var(--radius-md); background: var(--surface-input); box-shadow: var(--shadow); }
+.dialog h2 { font-size: 20px; margin: 0 0 12px; }
+.dialog p { color: var(--text-secondary); line-height: 1.8; }
+.dialog label { display: grid; gap: 6px; margin: 16px 0; }
+.dialog input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; color: var(--text-primary); background: var(--surface-editor); font: inherit; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+.dialog-actions > button { min-height: 30px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 10px; background: var(--surface-input); color: var(--text-primary); cursor: pointer; }
+.mobile-only { display: none; }
+@media(max-width:1200px) { .native-panels { grid-template-columns: 220px minmax(0, 1fr); } .native-context { display: none; } }
+@media(max-width:800px) {
+  .native-panels { grid-template-columns: minmax(0, 1fr); }
+  .native-side { display: none; }
+  .native-side.mobile-open { display: flex; position: absolute; z-index: 100; inset: 4px 4px 26px; background: var(--surface-nav); }
+  .mobile-only { display: inline-flex; }
+  .native-toolbar { flex-wrap: wrap; gap: 6px; }
+  .native-save-status { min-width: 50px; }
+  .native-latex-split { display: flex; flex-direction: column; overflow: auto; }
+  .native-latex-source { min-height: 300px; flex: 1; border-right: 0; border-bottom: 1px solid var(--border-subtle); }
+  .native-pdf-preview { min-height: 200px; flex: 1; }
+  .native-statusbar { gap: 6px; padding: 0 6px; }
+  .native-status-right { gap: 6px; }
+  .native-source-note, .native-office-note { padding: 8px 12px; }
+  .native-top .mobile-only { margin-left: auto; }
+}
+@media(prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0s !important; transition-duration: 0s !important; } }
+.native-paper-workspace, .native-docx-workspace { flex: 1; min-height: 0; min-width: 0; flex-direction: column; overflow: hidden; }
+.docx-editor-frame { flex: 1; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
+.native-version-notice { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; flex: none; padding: 10px 12px; color: var(--text-primary); background: var(--surface-raised); font-size: var(--text-sm); border-bottom: 1px solid var(--border-subtle); }
+.native-version-notice > span { flex: 1; min-width: 140px; }
+.native-text-button { color: var(--accent); border: 0; background: transparent; padding: 0 6px; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.native-context-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 24px; }
+.native-checkout { margin-bottom: 24px; }
+.native-checkout label { color: var(--text-secondary); font-size: var(--text-sm); }
+.native-checkout textarea { width: 100%; margin: 8px 0; padding: 8px; resize: vertical; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); background: var(--surface-input); font: var(--text-xs)/1.7 var(--font-code); overflow-wrap: anywhere; }
+.dialog { border: 0; color: var(--text-primary); }
+.dialog::backdrop { background: #20212640; }
+.native-settings-file-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.native-settings-file-actions label { width: 100%; }
+.native-settings-file-actions textarea { width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-editor); color: var(--text-primary); font: var(--text-xs)/1.7 var(--font-code); }
+.native-file-label { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 42%; color: var(--text-primary); font-size: var(--text-sm); }
+.native-file-label > span, .native-tab > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.native-file-label svg { width: 14px; height: 14px; flex: none; stroke-width: 1.5; }
+.native-source-binding { min-height: 30px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; padding: 5px 12px; color: var(--text-muted); font-size: var(--text-xs); border-bottom: 1px solid var(--border-subtle); }
+.native-create-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.native-filename { display: inline-flex; flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; }
+.native-filename > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.native-file-extension { flex: none; }
+.native-tree-row { min-width: 0; }
+.native-tree-row > .native-filename { flex: 1; }
+/* Arborist's default max-content rows opt into horizontal scrolling. This fixed
+   sidebar truncates the stem instead, preserving the file extension in view. */
+.native-file-tree [role="treeitem"] { min-width: 0 !important; }
+/* Upstream menu and formatting parts share one command bar. */
+.native-docx-editor { display:flex; flex-direction:column; height:100%; min-height:0; color:var(--doc-text); background:var(--doc-bg); color-scheme:light; }
+.native-docx-commandbar { display:flex; align-items:center; gap:4px; flex:none; min-width:0; margin:12px 16px; padding:4px 8px; min-height:40px; border-radius:24px; background:var(--doc-toolbar-bg,var(--doc-bg-hover)); position:relative; z-index:var(--doc-z-overlay); }
+@media(max-width:800px) { .native-docx-commandbar { margin:8px; padding:4px; gap:2px; } }

@@ -918,11 +918,11 @@ class Store:
     def review_records(self, ident, revision):
         return self.setting('reviews:'+ident+':'+str(revision),[])
 
-    def relate(self, src, dst, relation, status="candidate", metadata=None, target_revision=None, task_id=None, execution_token=None):
+    def relate(self, src, dst, relation, status="candidate", metadata=None, target_revision=None, task_id=None, execution_token=None, connection=None):
         require(src != dst, "不能创建自引用")
         require(relation in {"contains", "uses", "produces", "cites", "supports", "limits", "studies", "related", "depends_on"}, "关系类型不支持")
         require(status in {"candidate", "confirmed"}, "关系状态不支持")
-        with self.transaction() as c:
+        with (self.transaction() if connection is None else contextlib.nullcontext(connection)) as c:
             if task_id:self.assert_execution(c,task_id,execution_token)
             a, b = self.get(src, connection=c), self.get(dst, connection=c)
             if a["project_id"] and b["project_id"] and a["project_id"] != b["project_id"]:
@@ -941,10 +941,10 @@ class Store:
             if existing and (target_revision is not None or (metadata or {}).get('adopted_revision') is not None):
                 c.execute('UPDATE relations SET target_revision=?,source_revision=? WHERE id=?',(adopted,a['revision'],rid))
             self.event(c, "relation.saved", src, {"id": rid, "dst": dst, "type": relation,'requested_target_revision':target_revision,'previous_target_revision':existing['target_revision'] if existing else None})
-        return next(r for r in self.relations() if r["id"] == rid)
+        return next(r for r in self.relations(connection=connection) if r["id"] == rid)
 
-    def relations(self, ident=None):
-        with self.connect() as c:
+    def relations(self, ident=None, connection=None):
+        with (self.connect() if connection is None else contextlib.nullcontext(connection)) as c:
             rows = c.execute("SELECT * FROM relations WHERE (? IS NULL OR src=? OR dst=?)", (ident, ident, ident)).fetchall()
             result = []
             for r in rows:

@@ -93,6 +93,9 @@ def infer_output(request: str) -> str:
 
 
 def candidate_schema(kind: str, task=None) -> str:
+    if task and task['payload'].get('kind') in {'research_exploration', 'research_work', 'research_partner'}:
+        from .research_tasks import domain
+        return domain(task['payload']['kind']).schema(task) if task['payload']['kind'] == 'research_partner' else domain(task['payload']['kind']).schema()
     if kind=='manuscript_revision':
         from .manuscript_revision import schema
         return schema(task)
@@ -204,6 +207,10 @@ def _patch(base, proposed, key=None):
 
 def validate_candidate(candidate, kind, app, project_id, *, base_content=None, task=None):
     """Return validated content; optional base content makes omissions non-destructive."""
+    if task and task['payload'].get('kind') in {'research_exploration', 'research_work', 'research_partner'}:
+        require(kind == 'note' and base_content is None, '探索提案不修改既有成果', 'invalid_model_output', 422)
+        from .research_tasks import domain
+        return domain(task['payload']['kind']).validate(candidate, task, app, project_id)
     if kind=='manuscript_revision':
         from .manuscript_revision import validate
         return validate(candidate,task)

@@ -308,6 +308,22 @@ class ProjectFiles:
             prefix = 'workshop' if obj['kind'] == 'workshop_note' else 'figures' if obj['kind'] in {'figure', 'diagram', 'poster', 'slides'} else 'manuscript'
             stem = stable('object:' + obj['id'], clean['title'])
             add(prefix + '/' + stem + '.json', _json(clean), 'preparation_source' if obj['kind'] == 'workshop_note' else 'editable_source', **origin)
+            source_mode = obj['content'].get('paper_source_mode') if obj['kind'] == 'paper' else None
+            if obj['kind'] == 'paper' and obj['content'].get('docx_asset'):
+                sha = obj['content']['docx_asset']
+                check_asset(sha, obj)
+                self.store.asset(sha, connection)
+                add(prefix + '/' + stem + '.docx', (self.store.blobs / sha).read_bytes(),
+                    'native_manuscript' if source_mode == 'docx' else 'retained_manuscript',
+                    source_format='docx', asset_sha256=sha, download_url='/api/assets/' + sha, **origin)
+            if obj['kind'] == 'paper' and obj['content'].get('univer_snapshot'):
+                add(prefix + '/' + stem + '.univer.json', _json(obj['content']['univer_snapshot']),
+                    'native_manuscript' if source_mode == 'univer' else 'retained_manuscript', source_format='univer', **origin)
+            if obj['kind'] == 'paper' and obj['content'].get('latex', '').strip():
+                add(prefix + '/' + stem + '.tex', obj['content']['latex'].encode(),
+                    'native_manuscript' if source_mode == 'latex' else 'retained_manuscript', source_format='latex', **origin)
+            if source_mode in {'docx', 'latex', 'univer'}:
+                continue
             if 'manuscript_format' in obj.get('metadata', {}):
                 from .manuscript_format40 import format_for
                 add('configs/' + stem + '.layout.json', _json({'format': format_for(obj), 'object_id': obj['id'],
@@ -493,7 +509,10 @@ class ProjectFiles:
         data = target.read_bytes()
         require(digest(data) == entry['sha256'], '项目文件在读取时改变；原内容保留', 'project_file_conflict', 409)
         media = entry.get('media_type') or mimetypes.guess_type(path)[0] or 'application/octet-stream'
-        text = media.startswith('text/') or Path(path).suffix in {'.json', '.md', '.py', '.r', '.jl', '.toml', '.yaml', '.yml', '.bib', '.tex'}
+        text = media.startswith('text/') or Path(path).suffix.lower() in {
+            '.json', '.md', '.py', '.r', '.jl', '.m', '.toml', '.yaml', '.yml', '.bib', '.tex',
+            '.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.css', '.html', '.xml', '.sh', '.sql',
+            '.ini', '.cfg', '.lock', '.txt', '.c', '.cpp', '.h', '.rs', '.go', '.ipynb'}
         try: content = data.decode('utf-8') if text else None
         except UnicodeError: content = None
         return {'project_id': project_id, 'path': path, 'revision': entry.get('revision'), 'object_id': entry.get('object_id'),

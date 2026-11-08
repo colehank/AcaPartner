@@ -1,0 +1,11 @@
+import {createContext} from 'react';
+import type {DockviewApi} from 'dockview-react';
+import type {Session} from '../session';
+import type {SourceFormat} from '../documents/types';
+import type {ManuscriptController} from './useManuscript';
+export type ViewSpec={id:string;kind:string;title:string;value?:string;data?:any};
+export type ResearchFocus={project_id:string;id:string;label:string;title:string};
+export type WorkbenchState={projects:any[];objects:any[];tasks:any[];providers:any[];runtime:{running?:boolean};preferences:any;project_management:{can_create:boolean;writable_project_ids:string[]};[key:string]:any};
+export type WorkbenchValue={project:any;catalog:WorkbenchState;session:Session|null;manuscript:ManuscriptController;research:any;theme:'light'|'dark';api:DockviewApi|null;researchNavigation:{project_id:string;id:string;sequence:number}|null;researchFocus:ResearchFocus|null;setResearchFocus:(value:ResearchFocus|null)=>void;
+ open:(spec:ViewSpec,pinned?:boolean)=>void;openLocalDocx:(file:File)=>Promise<void>;registerFileFlush:(id:string,flush:(()=>Promise<void>)|null)=>void;flushFile:(id:string)=>Promise<void>;openDocument:(format:SourceFormat,pinned?:boolean)=>void;openPaper:()=>void;openNote:(path:string,pinned?:boolean)=>void;refresh:()=>Promise<void>;refreshResearch:()=>Promise<void>;chooseProject:(project:any)=>Promise<void>;report:(error:unknown)=>void;pin:(id:string)=>void;markDirty:(id:string,dirty:boolean)=>void;locate:(id:string,part:string)=>void;logout:()=>Promise<void>;createQuestion:(parentId?:string)=>void;setGlobal:(view:string)=>void};
+export const WorkbenchContext=createContext<WorkbenchValue|null>(null);

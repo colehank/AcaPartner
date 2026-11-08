@@ -8,7 +8,7 @@ from __future__ import annotations
 import copy
 import json
 
-from .store import digest, encoded, require, uid
+from .store import Problem, digest, encoded, require, uid
 
 FEATURE = 'article_workspace_v1'
 KEY = 'article39:'
@@ -197,4 +197,10 @@ def dispatch(app, data, scope, principal=None):
     from .project_files import ProjectFiles
     files = ProjectFiles(app.store)
     if action == 'article.file_read': return files.read(project['id'], data.get('path'))
-    return files.sync_project(project['id'])
+    result = files.sync_project(project['id'])
+    from .generation import script_files
+    try: result['working_scripts'] = script_files(app, project)
+    except Problem as error:
+        result['working_scripts'] = []
+        result['working_scripts_error'] = str(error)
+    return result

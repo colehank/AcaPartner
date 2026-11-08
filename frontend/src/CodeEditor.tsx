@@ -1,16 +1,19 @@
 import {useEffect,useLayoutEffect,useRef} from 'react';
-import {EditorView,keymap,lineNumbers} from '@codemirror/view';
+import {EditorView,keymap,lineNumbers,drawSelection,highlightActiveLine} from '@codemirror/view';
 import {Compartment,EditorState,Transaction} from '@codemirror/state';
-import {markdown} from '@codemirror/lang-markdown';
-import {defaultKeymap,history,historyKeymap} from '@codemirror/commands';
+import {defaultKeymap,history,historyKeymap,indentWithTab} from '@codemirror/commands';
 import {search,searchKeymap} from '@codemirror/search';
+import {foldGutter,foldKeymap,indentOnInput,bracketMatching} from '@codemirror/language';
+import {unifiedMergeView} from '@codemirror/merge';
+import {codeLanguage} from './editors/languages';
+import {editorTheme,useEditorDark} from './editors/theme';
 
 export type TextPosition={cursor:number,anchor?:number,scrollTop?:number,scrollLeft?:number,restoreScroll?:boolean,viewportFrom?:number,viewportOffset?:number};
 
-export function CodeEditor({text,onChange,onPosition,initial={},viewId,jump=0,readOnly=false,language='markdown',ariaLabel='Markdown 编辑器'}:{
+export function CodeEditor({text,onChange,onPosition,initial={},viewId,jump=0,readOnly=false,language='markdown',filename,original,ariaLabel='Markdown 编辑器'}:{
   text:string,onChange:(value:string)=>void,onPosition:(value:TextPosition)=>void,
   initial?:Partial<TextPosition>,viewId:string,jump?:number,readOnly?:boolean,
-  language?:'markdown'|'plain',ariaLabel?:string,
+  language?:string,filename?:string,original?:string,ariaLabel?:string,
 }){
   const host=useRef<HTMLDivElement>(null),view=useRef<EditorView|null>(null);
   const handlers=useRef({onChange,onPosition});handlers.current={onChange,onPosition};
@@ -20,6 +23,9 @@ export function CodeEditor({text,onChange,onPosition,initial={},viewId,jump=0,re
   const focusedJump=useRef(0);
   const editing=useRef(new Compartment());
   const presentation=useRef(new Compartment());
+  const syntax=useRef(new Compartment()),theme=useRef(new Compartment()),comparison=useRef(new Compartment());
+  const dark=useEditorDark();
+  const compare=()=>original===undefined?[]:unifiedMergeView({original,mergeControls:false,allowInlineDiffs:true,diffConfig:{timeout:100,scanLimit:2000}});
   const visible=(v:EditorView)=>v.dom.isConnected&&v.scrollDOM.clientWidth>0&&v.scrollDOM.clientHeight>0;
   const record=(v:EditorView)=>{
     if(restoring.current||!visible(v))return;
@@ -62,10 +68,11 @@ export function CodeEditor({text,onChange,onPosition,initial={},viewId,jump=0,re
   };
   useEffect(()=>{
     const v=new EditorView({parent:host.current!,state:EditorState.create({doc:text,extensions:[
-      lineNumbers(),history(),search(),EditorView.lineWrapping,
+      lineNumbers(),foldGutter(),history(),search(),drawSelection(),highlightActiveLine(),indentOnInput(),bracketMatching(),EditorView.lineWrapping,
+      syntax.current.of([]),theme.current.of(editorTheme(dark)),comparison.current.of(compare()),
       editing.current.of([EditorState.readOnly.of(readOnly),EditorView.editable.of(!readOnly)]),
-      presentation.current.of([language==='markdown'?markdown():[],EditorView.contentAttributes.of({'aria-label':ariaLabel,'spellcheck':'false'})]),
-      keymap.of([...defaultKeymap,...historyKeymap,...searchKeymap]),
+      presentation.current.of([EditorView.contentAttributes.of({'aria-label':ariaLabel,'spellcheck':'false'})]),
+      keymap.of([indentWithTab,...defaultKeymap,...historyKeymap,...searchKeymap,...foldKeymap]),
       EditorView.updateListener.of(u=>{
         if(u.docChanged&&!u.transactions.every(t=>t.annotation(Transaction.addToHistory)===false))handlers.current.onChange(u.state.doc.toString());
         if(u.selectionSet)record(u.view);
@@ -86,7 +93,10 @@ export function CodeEditor({text,onChange,onPosition,initial={},viewId,jump=0,re
     return()=>{restoreEpoch.current++;resize.disconnect();v.scrollDOM.removeEventListener('scroll',scroll);v.destroy();view.current=null;};
   },[viewId]);
   useLayoutEffect(()=>{view.current?.dispatch({effects:editing.current.reconfigure([EditorState.readOnly.of(readOnly),EditorView.editable.of(!readOnly)])});},[readOnly,viewId]);
-  useLayoutEffect(()=>{view.current?.dispatch({effects:presentation.current.reconfigure([language==='markdown'?markdown():[],EditorView.contentAttributes.of({'aria-label':ariaLabel,'spellcheck':'false'})])});},[language,ariaLabel,viewId]);
+  useLayoutEffect(()=>{view.current?.dispatch({effects:presentation.current.reconfigure([EditorView.contentAttributes.of({'aria-label':ariaLabel,'spellcheck':'false'})])});},[ariaLabel,viewId]);
+  useEffect(()=>{let live=true;const v=view.current,description=codeLanguage(language,filename);v?.dispatch({effects:syntax.current.reconfigure([])});if(description)void description.load().then(support=>{if(live&&view.current===v)v?.dispatch({effects:syntax.current.reconfigure(support)});}).catch(()=>{});return()=>{live=false;};},[language,filename,viewId]);
+  useLayoutEffect(()=>{view.current?.dispatch({effects:theme.current.reconfigure(editorTheme(dark))});},[dark,viewId]);
+  useEffect(()=>{view.current?.dispatch({effects:comparison.current.reconfigure(compare())});},[original,viewId]);
   useEffect(()=>{const v=view.current;if(v&&v.state.doc.toString()!==text)v.dispatch({changes:{from:0,to:v.state.doc.length,insert:text},annotations:Transaction.addToHistory.of(false)});},[text]);
   useEffect(restore,[jump]);
   return <div className="editor-host" ref={host}/>;

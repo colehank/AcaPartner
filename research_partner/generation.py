@@ -15,6 +15,7 @@ from pathlib import Path
 import re
 import shlex
 import stat
+import stat
 import sys
 from .store import Problem, require, uid, digest, encoded, now
 from .notebook import _open_dir, _read_at, _create_at, _replace_at
@@ -50,8 +51,8 @@ def _project(app, ident, scope, principal):
     return project(app,ident,scope,principal,True)
 
 
-def _owner(principal):
-    require(not principal or principal.get('kind')!='agent' and principal.get('actor_kind')!='agent','Agent不能自行授权代码或采用计算定义','forbidden',403)
+def _owner(principal, message='Agent不能自行授权代码或采用计算定义'):
+    require(not principal or principal.get('kind')!='agent' and principal.get('actor_kind')!='agent',message,'forbidden',403)
 
 
 def script(app, project, filename, *, raw=None, expected=None):
@@ -79,6 +80,92 @@ def script(app, project, filename, *, raw=None, expected=None):
     except UnicodeError as error:raise Problem('脚本不是UTF-8；不执行或转换','source_unreadable',422) from error
     asset=app.store.add_asset(actual,filename,'text/x-python',{'project_id':project['id'],'script_snapshot':True,'source_path':'scripts/'+filename})
     return {'relative_path':'scripts/'+filename,'sha256':asset['sha'],'code':code,'authority_kind':'file','executed':False}
+
+
+
+def script_file_operation(app, project, data):
+    """Recoverable project-local script removal using the existing atomic mover."""
+    from .notebook_files import _rename
+    action=data['action'];p=data.get('payload',{})
+    require(isinstance(p,dict),'脚本文件操作需要对象')
+    allowed={'filename','expected_sha256'} if action=='recipe.script.trash' else {'trash_id'} if action=='recipe.script.restore' else set()
+    require(set(p)==allowed,'脚本文件操作字段不支持')
+    with app.notebook._locked(project['id']) as session:
+        try:fd=_open_dir(session['project_root_fd'],'scripts',create=action=='recipe.script.restore')
+        except Problem as error:
+            if action=='recipe.script.trash.list' and error.code=='not_found':return {'items':[]}
+            raise
+        trash=None
+        try:
+            try:trash=_open_dir(fd,'.trash',create=action!='recipe.script.trash.list')
+            except Problem as error:
+                if action=='recipe.script.trash.list' and error.code=='not_found':return {'items':[]}
+                raise
+            if action=='recipe.script.trash.list':
+                records=[]
+                names=[n for n in os.listdir(trash) if re.fullmatch(r'[a-f0-9]{64}\.json',n)]
+                require(len(names)<=2048,'脚本回收记录过多','context_limit',413)
+                for name in sorted(names):
+                    record=json.loads(_read_at(trash,name))
+                    try:info=os.stat(name[:-5]+'.py',dir_fd=trash,follow_symlinks=False)
+                    except FileNotFoundError:continue
+                    if (record.get('project_id')==project['id'] and not record.get('restored')
+                            and stat.S_ISREG(info.st_mode) and info.st_nlink==1 and info.st_size<=1024*1024):
+                        records.append({k:record[k] for k in ('trash_id','filename','sha256','at')})
+                return {'items':records}
+            if action=='recipe.script.trash':
+                filename=p.get('filename');require(isinstance(filename,str) and FILE.fullmatch(filename) and filename.endswith('.py'),'脚本名称无效')
+                token=digest({'project':project['id'],'request':data['request_id']});fingerprint=digest(data)
+                previous=_read_at(trash,token+'.json',absent=True)
+                if previous is not None:
+                    record=json.loads(previous);require(record['input']==fingerprint,'同一删除请求内容不同','idempotency_conflict',409)
+                    if _read_at(trash,token+'.py',absent=True) is not None:return {'trash_id':token,'filename':filename,'sha256':record['sha256'],'deleted':True,'replayed':True}
+                    require(not record.get('restored'),'此删除已撤销，请重新选择文件','script_conflict',409)
+                raw=_read_at(fd,filename);require(len(raw)<=1024*1024 and digest(raw)==p.get('expected_sha256'),'脚本已改变；未删除当前文件','script_conflict',409)
+                app.store.add_asset(raw,filename,'text/x-python',{'project_id':project['id'],'script_snapshot':True})
+                record={'trash_id':token,'project_id':project['id'],'filename':filename,'sha256':digest(raw),'input':fingerprint,'at':now(),'restored':False}
+                if previous is None:_create_at(trash,token+'.json',(encoded(record)+'\n').encode())
+                _rename(fd,filename,trash,token+'.py')
+                actual=_read_at(trash,token+'.py')
+                if digest(actual)!=record['sha256']:
+                    _rename(trash,token+'.py',fd,filename)
+                    raise Problem('文件在删除期间发生变化；已保留当前文件','script_conflict',409)
+                return {'trash_id':token,'filename':filename,'sha256':record['sha256'],'deleted':True}
+            token=p.get('trash_id');require(isinstance(token,str) and re.fullmatch(r'[a-f0-9]{64}',token),'脚本回收身份无效')
+            record=json.loads(_read_at(trash,token+'.json'));filename=record['filename']
+            require(record.get('project_id')==project['id'] and FILE.fullmatch(filename) and filename.endswith('.py'),'回收记录不属于此项目','forbidden',403)
+            if record.get('restored'):return {'filename':filename,'restored':True,'replayed':True}
+            raw=_read_at(trash,token+'.py',absent=True)
+            if raw is None:
+                require(digest(_read_at(fd,filename))==record['sha256'],'恢复状态不一致；双方内容保留','script_conflict',409)
+            else:
+                require(digest(raw)==record['sha256'],'回收内容已改变；未覆盖工作文件','script_conflict',409)
+                _rename(trash,token+'.py',fd,filename)
+            record['restored']=True;_replace_at(trash,token+'.json',(encoded(record)+'\n').encode())
+            return {'filename':filename,'restored':True}
+        finally:
+            if trash is not None:os.close(trash)
+            os.close(fd)
+
+
+def script_files(app, project):
+    """List real project working files; blob deduplication is not file identity."""
+    with app.notebook._locked(project['id']) as session:
+        try: fd = _open_dir(session['project_root_fd'], 'scripts')
+        except Problem as error:
+            if error.code == 'not_found': return []
+            raise
+        try:
+            names = sorted(name for name in os.listdir(fd) if FILE.fullmatch(name) and name.endswith('.py'))
+            require(len(names) <= 2048, '脚本数量超过工作台显示上限', 'context_limit', 413)
+            result = []
+            for name in names:
+                try: info = os.stat(name, dir_fd=fd, follow_symlinks=False)
+                except FileNotFoundError: continue
+                if stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size <= 1024*1024:
+                    result.append({'path': 'scripts/'+name, 'role': 'script_working_copy', 'size': info.st_size})
+            return result
+        finally: os.close(fd)
 
 
 def environment(app):
@@ -242,6 +329,7 @@ def dispatch(app, data, scope=None, principal=None):
         from .dataset_manifests import page
         return page(app,project,payload,scope,principal)
     if action=='recipe.script.read':return script(app,project,payload.get('filename'))
+    if action=='recipe.script.trash.list':return script_file_operation(app,project,data)
     if action=='build.status':
         task=app.store.task(payload.get('run_id'));require(task['project_id']==project['id'] and task['payload'].get('kind')=='generation','运行不属于此项目','forbidden',403)
         with app.store.connect() as connection:
@@ -277,6 +365,8 @@ def dispatch(app, data, scope=None, principal=None):
     if action=='recipe.script.import':
         asset=app.asset(payload.get('asset_sha256'),scope,project['id']);return script(app,project,payload.get('filename'),raw=(app.store.blobs/asset['sha']).read_bytes())
     if action=='recipe.script.write':return script(app,project,payload.get('filename'),raw=payload.get('code','').encode('utf-8'),expected=payload.get('expected_sha256'))
+    if action in {'recipe.script.trash','recipe.script.restore'}:
+        _owner(principal,'Agent不能回收或恢复用户脚本');return script_file_operation(app,project,data)
     if action=='recipe.propose':
         require(set(payload)=={'title','steps'},'配方仅接标题及明确步骤')
         candidate={'id':data.get('object_id') or 'UNSAVED','kind':'recipe','project_id':project['id'],'revision':data.get('expected_revision',0)+1,'archived':False,'content':{'steps':payload['steps']},'title':payload['title']}

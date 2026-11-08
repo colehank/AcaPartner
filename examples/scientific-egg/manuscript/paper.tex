@@ -1,0 +1,246 @@
+% SYNTHETIC DEMONSTRATION — no physical experiments
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+  chinese,
+  a4paper,
+  fontset=fandol]{ctexart}
+\usepackage{xcolor}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off,provide=*]{babel}
+\else
+\usepackage[bidi=default,shorthands=off,provide=*]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={从平均合适到配对达标：科学煮蛋的可复现模拟研究},
+  pdfauthor={AcaPartner 演示项目},
+  pdflang={zh-CN},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{从平均合适到配对达标：科学煮蛋的可复现模拟研究}
+\author{AcaPartner 演示项目}
+\date{合成数据研究示例 · 非真实实验}
+
+\usepackage[section]{placeins}
+\usepackage{caption}
+\captionsetup{labelformat=empty,font=small}
+\begin{document}
+\maketitle
+
+\section{摘要}\label{ux6458ux8981}
+
+\textbf{目的。}
+展示如何在同一项目中，把可拆分的研究问题、数据与脚本、证据和论文组织为可检查的研究链。科学问题是：蛋白与蛋黄的两个目标能否在同一枚蛋上兼顾，以及这种兼顾能否稳定复现。
+
+\textbf{方法。}
+采用公开、未校准的双节点热响应与累计反应代理模型，生成4种程序、4个批次、3档质量和2档初温的480枚模拟蛋。所有样本均以sample\_id配对。计算40,080条温度记录，但独立样本计数仍为480。保留4个缺失蛋白读数的样本，不插补，并保守地用全部样本作为主要分母。
+
+\textbf{结果。} 周期程序配对达标45/120（37.5\%，名义95\%
+Wilson区间29.4\%--46.4\%）；沸水12分钟为8/120，其他两种程序在本次判据下为0/120。周期程序的平均蛋白与蛋黄指数分别为9.74和8.26，均落在其目标范围，但这并不意味着大多数个体配对达标。周期程序跨批次达标率从6.7\%到100.0\%。
+
+\textbf{结论。}
+在这组明确构造的模拟数据中，周期程序出现了配对达标样本，整体均值却掩盖显著的批次差异。示例不能证明现实中周期煮蛋的稳定性；它说明科研平台应保留样本身份、来源、分母和未决问题，而不只展示一个总平均值。
+
+\section{1　背景与研究问题}\label{ux80ccux666fux4e0eux7814ux7a76ux95eeux9898}
+
+公开研究提出通过冷热交替边界条件调节蛋内不同区域的受热过程{[}1{]}。本示例借用其程序名称与处理时长作为背景，另建一个低维、现象学模型；没有导入该论文的实验数据、图像、拟合参数或CFD结果，也不声称复现其科学结论。
+
+本项目并列维护两个问题。Q1：同一枚蛋能否同时满足蛋白凝固与蛋黄柔软的操作性目标？其子问题分别检查蛋白目标、蛋黄目标以及二者是否在同一样本上出现。Q2：观察到的配对达标能否跨批次稳定复现？其子问题检查质量与初温分层、批次过程变化及判据敏感性。父问题保留独立的分析、证据和结论，不自动由子问题状态替代。
+
+\section{2　方法}\label{ux65b9ux6cd5}
+
+\FloatBarrier
+\subsection{2.1　设计与生成来源}\label{ux8bbeux8ba1ux4e0eux751fux6210ux6765ux6e90}
+
+采用4×4×3×2×5的平衡设计：4种程序、4个批次、标称质量50/60/70
+g、标称初温4/22°C，每格5个模拟重复，共480枚；每种程序120枚，每批每程序30枚，每个程序的质量/初温格20枚。质量、初温、传热时常和测量噪声按公开脚本生成，随机种子为20261029。所有数值均为合成值，\texttt{is\_simulated=True}。
+
+程序为沸水6分钟、沸水12分钟、65°C恒温60分钟，以及100/30°C每2分钟切换、持续32分钟的周期条件。温度上限在模型中限定为100°C。B04的周期程序在固定32分钟总长内将每个热半周期延长20秒，并有相应的温控偏移；该变化在配置和逐行数据中记录，没有被事后删除。
+
+\FloatBarrier
+\subsection{2.2　热响应与质构代理}\label{ux70edux54cdux5e94ux4e0eux8d28ux6784ux4ee3ux7406}
+
+令Tw和Ty分别为蛋白、蛋黄节点温度，Tb为水浴边界。采用
+\(\frac{dT_w}{dt}=\frac{T_b-T_w}{\tau_w}\) 及
+\(\frac{dT_y}{dt}=\frac{T_w-T_y}{\tau_y}\)，时常按质量的2/3次方缩放，并加入公开生成的个体差异。以2秒步长积分，每20秒记录温度。名义时常为66秒和270秒；完整参数与批次偏移见protocol.json。
+
+质构指数由温度依赖的指数速率累积后映射至0--10，再叠加测量噪声。蛋白指数越高表示代理模型中的凝固程度越高；蛋黄指数越高表示越软，过高也可能不在``柔软但成形''的目标区间。两个指数都没有经过实物标定，不是蛋白质变性率、感官评分或食品安全标准。
+
+\FloatBarrier
+\subsection{2.3　判据、配对与质量检查}\label{ux5224ux636eux914dux5bf9ux4e0eux8d28ux91cfux68c0ux67e5}
+
+在对生成数据分类前，固定演示判据：蛋白指数\ensuremath{\geq}7.5，蛋黄指数处于闭区间{[}5.0,8.5{]}，并且两个条件在同一个sample\_id同时成立。4行蛋白读数缺失被标为不可判定，不进行插补；主要达标率的分母包含这些行，完整样本口径另存于汇总表。没有基于结果的样本剔除。
+
+95\%
+Wilson区间仅描述模拟蛋级二项计数，未对批内相关性进行调整，不能作为现实人群或未来批次的验证区间。批次结果单独展示；只报告描述性差异，不进行显著性检验或因果推断。判据敏感性在蛋黄区间固定时，将蛋白下限从6.5改变到9.0。
+
+\section{3　结果}\label{ux7ed3ux679c}
+
+\FloatBarrier
+\subsection{3.1　不同处理程序产生不同的内外温度轨迹}\label{ux4e0dux540cux5904ux7406ux7a0bux5e8fux4ea7ux751fux4e0dux540cux7684ux5185ux5916ux6e29ux5ea6ux8f68ux8ff9}
+
+蛋白节点较快追随水浴，而蛋黄节点的响应更迟缓。周期边界在蛋白节点留下较大的波动，在蛋黄节点表现为较小的波动与滞后；恒温程序趋于共同平台。这里显示的是四枚按设计身份选定的参考模拟蛋，不把一条长时间序列视为更多的生物学重复。
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm,height=\textheight,keepaspectratio,alt={图1　不同处理程序的双节点温度轨迹。a为蛋白节点，b为蛋黄节点。每种程序使用B01、标称60 g、初温22°C分层中按样本序号预先固定的一枚模拟蛋；不是平均曲线，不以时间点充当独立样本。曲线只展示生成模型的时间响应。}]{fig1_thermal.png}
+\caption{图1　不同处理程序的双节点温度轨迹。a为蛋白节点，b为蛋黄节点。每种程序使用B01、标称60
+g、初温22°C分层中按样本序号预先固定的一枚模拟蛋；不是平均曲线，不以时间点充当独立样本。曲线只展示生成模型的时间响应。}
+\end{figure}
+
+\clearpage
+\subsection{3.2　``平均值合适''掩盖了个体配对结果}\label{ux5e73ux5747ux503cux5408ux9002ux63a9ux76d6ux4e86ux4e2aux4f53ux914dux5bf9ux7ed3ux679c}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lrrrrl@{}}
+\toprule\noalign{}
+程序 & 全部样本 & 可判定 & 配对达标 & 达标率 & 名义95\%区间 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+沸水6分钟 & 120 & 117 & 0 & 0.0\% & 0.0\%--3.1\% \\
+沸水12分钟 & 120 & 120 & 8 & 6.7\% & 3.4\%--12.6\% \\
+65°C恒温60分钟 & 120 & 119 & 0 & 0.0\% & 0.0\%--3.1\% \\
+冷热交替32分钟 & 120 & 120 & 45 & 37.5\% & 29.4\%--46.4\% \\
+\end{longtable}
+}
+
+周期程序的平均指数同时满足演示阈值，而逐个样本判断仅45枚配对达标。恒温程序主要受蛋白目标限制；较长沸水程序主要受蛋黄目标限制。总平均值、两个边际比例和同一样本的联合事件不能互相替代。
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm,height=\textheight,keepaspectratio,alt={图2　均值合适不等于同一枚蛋同时达标。a显示476个读数完整样本的配对质构指标；浅色区域为白指数\ensuremath{\geq}7.5且黄指数处于{[}5.0,8.5{]}。缺失的4行不在二维散点上显示，但没有从分析中删除。b为达标个数/全部120枚，误差线是名义95\% Wilson区间，不处理批内相关性，仅为合成数据的描述。}]{fig2_joint.png}
+\caption{图2　均值合适不等于同一枚蛋同时达标。a显示476个读数完整样本的配对质构指标；浅色区域为白指数\ensuremath{\geq}7.5且黄指数处于{[}5.0,8.5{]}。缺失的4行不在二维散点上显示，但没有从分析中删除。b为达标个数/全部120枚，误差线是名义95\%
+Wilson区间，不处理批内相关性，仅为合成数据的描述。}
+\end{figure}
+
+\clearpage
+\subsection{3.3　单批成功不能证明稳定复现}\label{ux5355ux6279ux6210ux529fux4e0dux80fdux8bc1ux660eux7a33ux5b9aux590dux73b0}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lrr@{}}
+\toprule\noalign{}
+周期程序批次 & 配对达标/总数 & 达标率 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+B01 & 5/30 & 16.7\% \\
+B02 & 8/30 & 26.7\% \\
+B03 & 2/30 & 6.7\% \\
+B04* & 30/30 & 100.0\% \\
+\end{longtable}
+}
+
+周期程序在B04表现最好，但该批次同时具有过程变化和温控偏移。因此不能将更高达标率单独归因于任一因素，更不能据此宣称默认周期程序已经稳定。相较于全部样本汇总，保留批次维度给出了不同的研究判断：存在可行样本与具备稳定方法，是两个需要分别回答的问题。
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm,height=\textheight,keepaspectratio,alt={图3　批次变化与判据敏感性。a为每批每程序30枚的配对达标率，四批均为模拟过程组；B04同时具有热端占空比变化与温控偏移，星号不是排除标记。b在保持蛋黄区间不变时重算不同蛋白阈值的达标率；曲线是同一批生成样本的确定性重分类，不是新的独立实验。}]{fig3_robustness.png}
+\caption{图3　批次变化与判据敏感性。a为每批每程序30枚的配对达标率，四批均为模拟过程组；B04同时具有热端占空比变化与温控偏移，星号不是排除标记。b在保持蛋黄区间不变时重算不同蛋白阈值的达标率；曲线是同一批生成样本的确定性重分类，不是新的独立实验。}
+\end{figure}
+
+\section{4　讨论}\label{ux8ba8ux8bba}
+
+本例最有用的结果不是宣布一种``完美煮蛋法''，而是展示研究认识如何受到数据粒度和证据范围约束。Q1在模型内部获得了有限的可行性证据，Q2则仍然没有稳定性支持。B04可提出新的热端占空比假设，但它不是随机化干预，也不能替代受控比较。
+
+平台中的分析脚本读取完整CSV，绘图脚本读取分析输出，论文从汇总JSON与图表组装。证据链接保留对象修订；原始文件、缺失行和运行记录可独立下载。改变判据后应重新运行分析并产生新结果，而不是只手动改论文中的数字。
+
+下一步的演示计划是：保持批次温控偏移不变，单独比较50\%与58.3\%的热端占空比，再使用新的模拟批次或真实测量检验。真实研究还需校准质构指标、检验热模型、控制样本属性并满足适用的食品安全要求。本例不提供食用安全或烹调建议。
+
+\section{5　限制与复现}\label{ux9650ux5236ux4e0eux590dux73b0}
+
+全部数据由一个未校准的生成模型产生，因此处理差异部分来自模型设计；四个模拟批次并不构成实物验证。未观察的热史、批次内依赖、质构量表和缺失机制都可能改变结果。此处没有感官实验、仪器测量、营养组学或微生物安全评估。研究结论仅限于这一次公开生成过程及其判据。
+
+按顺序执行01\_simulate.py、02\_analyze.py、03\_plot.py和04\_write\_paper.py，可重新生成全部数据、汇总表、图和文稿。运行回执记录命令、实际退出码、代码与文件SHA-256。平台内的DOCX和LaTeX为本次批量生成的两份独立保存稿；在编辑器中修改其中一份不会自动改写另一份。
+
+\section{数据与代码可用性}\label{ux6570ux636eux4e0eux4ee3ux7801ux53efux7528ux6027}
+
+data/observations.csv含480行原始模拟观测，data/temperature\_traces.csv含40,080行温度记录；data/data\_dictionary.json定义变量与缺失；protocol.json定义生成模型和演示判据；results/包含分类、分层、敏感性与质量检查。figures/包含可编辑SVG/PDF与PNG。所有数据和分析代码随示例提供。模拟数据与真实实验数据明确分开登记。
+
+\section{参考文献}\label{ux53c2ux8003ux6587ux732e}
+
+{[}1{]} Di Lorenzo E. et al.~Periodic cooking of eggs. Communications
+Engineering 4, 5 (2025). https://doi.org/10.1038/s44172-024-00334-w
+（仅作为背景与程序灵感；本示例未使用该论文原始数据。）
+
+\section{补充结果}\label{ux8865ux5145ux7ed3ux679c}
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm,height=\textheight,keepaspectratio,alt={补充图S1　质量与初温分层下的配对达标计数。a为沸水6分钟，b为周期程序；每格20枚，保留全部四批。颜色0--100\%使用同一量程；此分层比较仍混合批次影响，不能单独归因于质量或初温。}]{figS1_conditions.png}
+\caption{补充图S1　质量与初温分层下的配对达标计数。a为沸水6分钟，b为周期程序；每格20枚，保留全部四批。颜色0--100\%使用同一量程；此分层比较仍混合批次影响，不能单独归因于质量或初温。}
+\end{figure}
+
+\end{document}

@@ -1,0 +1,12 @@
+# Generated state, private projects and installed dependencies.
+.code-review-graph/
+.private/
+.runtime/
+.venv/
+node_modules/
+dist/
+
+# The editable frontend sources are under frontend/src/.
+research_partner/web/workdesk/assets/
+research_partner/web/workdesk/pdfjs/
+research_partner/web/workdesk/licenses/

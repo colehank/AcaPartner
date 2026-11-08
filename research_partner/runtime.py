@@ -5,6 +5,7 @@ import json
 import os
 import signal
 import subprocess
+import sys
 import threading
 import time
 import tempfile
@@ -37,6 +38,9 @@ def write_process_receipt(path, record):
 
 
 def process_identity(pid):
+    if sys.platform == 'darwin':
+        from .process_control import identity
+        return identity(pid)
     try:
         root=Path('/proc')/str(pid)
         stat=(root/'stat').read_text().rsplit(')',1)[1].split()
@@ -61,6 +65,7 @@ def confirm_process_identity(child, budget_deadline, tracking, *, timeout_code='
             require(not tracking.get('anchor') or tracking['anchor']==anchor,
                     '新执行进程身份在登记前变化','process_identity',409)
             tracking['anchor']=anchor
+            if current.get('identity_source'):tracking['identity_source']=current['identity_source']
             if current['state']=='Z':
                 record={**current,'command_sha256':None,'identity_kind':'terminal_group_anchor'}
             elif current['command_sha256']!=digest(b''):
@@ -94,7 +99,25 @@ def cleanup_unregistered(child, tracking):
         anchor=observed
     child.kill();child.wait(timeout=5)
     if anchor:
-        terminate_owned({**anchor,'command_sha256':None,'state':'terminal_group_anchor'},hard=True)
+        source=tracking.get('identity_source') or (current or {}).get('identity_source')
+        terminate_owned({**anchor,**({'identity_source':source} if source else {}),
+                         'command_sha256':None,'state':'terminal_group_anchor'},hard=True)
+
+
+def process_group_members(record):
+    if sys.platform == 'darwin':
+        from .process_control import group_members
+        return group_members(record)
+    result=[]
+    for path in Path('/proc').iterdir():
+        if not path.name.isdigit():continue
+        try:
+            stat=(path/'stat').read_text().rsplit(')',1)[1].split()
+            if int(stat[2])==record['pid'] and int(stat[3])==record['pid'] and stat[0]!='Z':
+                require(path.stat().st_uid==record['uid'] and int(stat[19])>=int(record['start_ticks']),'进程组身份已变化','process_identity',409)
+                result.append(int(path.name))
+        except (FileNotFoundError,ProcessLookupError,PermissionError):continue
+    return result
 
 
 def terminate_owned(record, *, hard=False):
@@ -122,16 +145,7 @@ def terminate_owned(record, *, hard=False):
                 current=process_identity(record['pid'])
             # A disappeared leader still requires the old group checks below.
     def members():
-        result=[]
-        for path in Path('/proc').iterdir():
-            if not path.name.isdigit():continue
-            try:
-                stat=(path/'stat').read_text().rsplit(')',1)[1].split()
-                if int(stat[2])==record['pid'] and int(stat[3])==record['pid'] and stat[0]!='Z':
-                    require(path.stat().st_uid==record['uid'] and int(stat[19])>=int(record['start_ticks']),'进程组身份已变化','process_identity',409)
-                    result.append(int(path.name))
-            except (FileNotFoundError,ProcessLookupError,PermissionError):continue
-        return result
+        return process_group_members(record)
     if not members():return True
     # Hard task deadlines cannot wait through the ordinary graceful-stop period.
     # The same identity and group ownership checks above remain mandatory.
@@ -160,6 +174,9 @@ class Runtime:
         self.started_at=None
 
     def start(self, *, recover_existing=True):
+        if sys.platform == 'darwin':
+            require(process_identity(os.getpid()) is not None,
+                    '无法核验当前运行器进程', 'runtime_unavailable', 503)
         require(not any(t.is_alive() for t in self.threads),'旧执行轮次尚未退出','runtime_draining',409)
         require(self.lock is None,'运行器仍持有工作区锁','runtime_owned',409)
         self.lock=open(self.store.workspace/'runtime.lock','a+')
@@ -455,6 +472,9 @@ class Runtime:
             Budget(self.app.config['development_budget']).check()
         with self.store.transaction() as c:
             self.store.assert_execution(c,ident,token)
+            if self.store.task(ident,c)['payload'].get('kind') in {'research_exploration', 'research_work', 'research_partner'}:
+                from .research_tasks import domain
+                domain(self.store.task(ident,c)['payload']['kind']).guard(self.app,self.store.task(ident,c),c)
             from .growth_execution import guard_configuration as assert_assessor_configuration
             assert_assessor_configuration(self.app,c,self.store.task(ident,c))
             # Re-check decisions at execution boundaries, including questions
@@ -814,6 +834,9 @@ class Runtime:
                     prompt='You are the bounded project-management partner. Interpret this natural request within the explicit frozen grant. Return a typed project_management candidate with actual requested changes and/or lookup requests. A lookup is executed by the product after your candidate; do not invent results or claim writes. No research report, graph edits, external tools, task-control actions or implicit permissions. Ambiguous target: request only scoped lookups and explain the ambiguity. Your candidate must be visibly reviewed and explicitly applied.\nREQUIRED OUTPUT SCHEMA:\n'+schema+'\nREQUEST:\n'+payload['request']
                 if payload['kind']=='manuscript_revision':
                     prompt='You are a manuscript revision partner. Read the frozen contract and original opinions. For contract version 2 respond to EVERY opinion separately with specific reasoning, verification and limitations; associate each response with its change_ids. Propose only changes to the exact frozen targets. Manuscript blocks and explicit figure captions are public-facing output; workshop_note blocks are internal preparation, never inject plans or replies into manuscript prose. One opinion can require both, with separate change IDs. Preserve scientific claims, original purpose, uncertainty and scope. Do not invent evidence, citations, calculations, verification results or approvals. A reply or candidate is not resolution; the user decides each change. Do not alter unselected content, numerics or execute science. For version 1 use the paragraph contract without changing its schema.\nREQUIRED OUTPUT SCHEMA:\n'+schema+'\nREQUEST:\n'+payload['request']
+                if payload['kind'] in {'research_exploration', 'research_work', 'research_partner'}:
+                    from .research_tasks import domain
+                    prompt=domain(payload['kind']).prompt(task,schema)
                 if base_target:
                     from .resolver import evidence_projection
                     prompt+='\nTARGET SOURCE (exact scientific fields of adopted revision; retain stable IDs and untargeted user content):\n'+json.dumps(evidence_projection(base_target),ensure_ascii=False)
@@ -895,6 +918,9 @@ class Runtime:
             'candidate_sha256':digest(candidatefile.read_bytes()),'input_provenance':receipt.get('input_provenance'),
             'basis':'validated generation checkpoint or registered native prompt; not a claim of semantic understanding'},execution_token=token)
         content=validate_candidate(candidate,output_kind,self.app,payload['project_id'],base_content=base_target['content'] if base_target else None,task=task)
+        if payload['kind'] in {'research_exploration', 'research_work', 'research_partner'}:
+            from .research_tasks import domain
+            domain(payload['kind']).publish(self.app,task,candidate,receipt,digest(candidatefile.read_bytes()));return
         if payload['kind']=='project_management':
             from .project_management import publish
             publish(self.app,task,candidate,receipt,digest(candidatefile.read_bytes()));return

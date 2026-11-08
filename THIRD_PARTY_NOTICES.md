@@ -4,26 +4,47 @@ The main project is MIT licensed. These direct frontend dependencies are declare
 
 | Package | Declared version | Upstream license |
 | --- | --- | --- |
+| `@xyflow/react` | 12.12.1 | MIT |
+| `@dagrejs/dagre` | 3.1.3 | MIT |
+| `@viz-js/viz` | 3.31.0 | MIT wrapper; bundled components below |
 | `@codemirror/commands` | 6.11.1 | MIT |
 | `@codemirror/lang-markdown` | 6.5.2 | MIT |
+| `@codemirror/language` | 6.13.1 | MIT |
+| `@codemirror/legacy-modes` | 6.5.1 | MIT |
 | `@codemirror/search` | 6.7.2 | MIT |
 | `@codemirror/state` | 6.7.6 | MIT |
 | `@codemirror/view` | 6.43.14 | MIT |
+| `@radix-ui/react-context-menu` | 2.4.1 | MIT |
+| `@radix-ui/react-dropdown-menu` | 2.2.1 | MIT |
+| `@superdoc/react` | 2.23.0 | AGPL-3.0 |
+| `idb-keyval` | 6.2.2 | Apache-2.0 |
 | `dockview-react` | 8.4.1 | MIT |
-| `dompurify` | 3.4.16 | (MPL-2.0 OR Apache-2.0) |
-| `markdown-it` | 15.0.2 | MIT |
+| `dompurify` | 3.4.17 | (MPL-2.0 OR Apache-2.0) |
+| `lucide-react` | 1.62.0 | ISC |
+| `markdown-it` | 15.0.3 | MIT |
 | `pdfjs-dist` | 6.4.299 | Apache-2.0 |
 | `react` | 19.3.0 | MIT |
 | `react-arborist` | 3.16.0 | MIT |
 | `react-dom` | 19.3.0 | MIT |
-| `prosemirror-model` | 1.25.12 | MIT |
-| `prosemirror-state` | 1.4.4 | MIT |
-| `prosemirror-view` | 1.42.6 | MIT |
-| `prosemirror-keymap` | 1.2.3 | MIT |
-| `prosemirror-history` | 1.5.1 | MIT |
-| `prosemirror-commands` | 1.7.2 | MIT |
-| `prosemirror-markdown` | 1.13.8 | MIT |
-| `@xyflow/react` | 12.12.0 | MIT |
+| `superdoc` | 2.28.0 | AGPL-3.0 or a separate commercial agreement |
+| `@codemirror/language-data` | 6.5.2 | MIT |
+| `@codemirror/merge` | 6.12.3 | MIT |
+| `@shikijs/langs` | 4.5.0 | MIT |
+| `@shikijs/markdown-it` | 4.5.0 | MIT |
+| `@shikijs/themes` | 4.5.0 | MIT |
+| `@uiw/codemirror-theme-github` | 4.25.12 | MIT |
+| `shiki` | 4.5.0 | MIT |
+
+The build uses `vite-plugin-static-copy` 4.1.1 (MIT) to serve PDF.js's matching CMaps and standard fonts locally. Their upstream license files are included under `research_partner/web/workdesk/pdfjs/cmaps/` and `pdfjs/standard_fonts/`. No CDN font or CMap request is needed.
+
+
+## Seti file icons
+
+The vendored file icon font and filename associations come from the MIT-licensed VS Code `extensions/theme-seti` sources, with Seti UI attribution retained. Pinned upstream commits and SHA-256 records are in `frontend/public/licenses/seti/UPSTREAM.json`; original VS Code and Seti UI license texts are in the same directory. Vite bundles the local WOFF and mappings; icons require no runtime download.
+
+## Research graph layout
+
+`@viz-js/viz` 3.31.0 is used through its published API under MIT. Its local WebAssembly distribution includes Graphviz 16.1.0 (EPL-2.0) and Expat (MIT). Their complete upstream notices are preserved in `frontend/public/licenses/research-graph.txt`, copied unchanged to `research_partner/web/workdesk/licenses/research-graph.txt`, and served at `/workdesk/licenses/research-graph.txt`. These bundled component notices supplement the generated JavaScript bundle notice; the project MIT license does not replace them. The adapter and local deployment boundary are documented in [Research graph layout](docs/architecture/research-graph-layout.md).
 
 ## Fonts
 
@@ -32,3 +53,21 @@ The main project is MIT licensed. These direct frontend dependencies are declare
 - Noto Emoji: `research_partner/fonts/NotoEmoji.LICENSE`.
 
 These fonts are redistributed with their original license files. Optional external tools (XeLaTeX/BibTeX, scientific Python, Snakemake, Office tools, local model clients) are configured separately and are not installed or sublicensed by this source package.
+
+## Optional Python task runtime
+
+The `runtime` extra installs `psutil` 7.2.2 on macOS, under its upstream BSD 3-Clause license, for native process identity and process-group observations. It is installed as a separate Python dependency; its license is included in the installed distribution. The editing-only workbench does not import or require it. Linux retains its existing `/proc` implementation. See [psutil](https://github.com/giampaolo/psutil) and the [upstream license](https://github.com/giampaolo/psutil/blob/release-7.2.2/LICENSE).
+
+<a id="superdoc-试用依赖"></a>
+
+## SuperDoc 文档编辑依赖
+
+项目论文与独立本地 DOCX 标签统一采用 `superdoc` 2.28.0 与 `@superdoc/react` 2.23.0。两者的包内 LICENSE 为 GNU AGPL v3；SuperDoc NOTICE 另说明可采用单独商业协议。原始 SuperDoc LICENSE / NOTICE 位于 `research_partner/web/workdesk/licenses/superdoc/`。项目自身的 MIT 许可不对这些依赖重新授权，也不构成闭源使用或生产发布批准。
+
+`superdoc` 传递引入 `@superdoc/docx-engine` 0.27.0，其声明为 `SEE LICENSE IN DOCX-ENGINE-LICENSE.md`，采用 **SuperDoc DOCX Engine Proprietary License，Version 2026-07-14**，由 Harbour Enterprises, Inc., d/b/a SuperDoc 提供。该引擎是独立专有组件，不是 AGPL 开源代码，整个依赖栈并非完全开源；其使用作为 SuperDoc 依赖受该专有条款与适用协议约束。原文从安装包逐字节保留于 `frontend/public/licenses/superdoc/DOCX-ENGINE-LICENSE.md`，构建后位于 `research_partner/web/workdesk/licenses/superdoc/DOCX-ENGINE-LICENSE.md`，上游地址为 [DOCX Engine license](https://docs.superdoc.dev/resources/docx-engine-license)。生成的 bundle notice 仅列出该包的许可引用；随构建保留的原文另行提供完整条款。
+
+工作台文件菜单“编辑器许可说明”链接本地 `licenses/superdoc/README.txt` 概览。该摘要页同步说明当前本机开发集成和项目 / 独立本地文件边界；原始法律文本未改写。引擎条款允许授权范围内作为 SuperDoc 依赖的评估、开发和集成，并对修改、再分发、逆向与竞争用途另设约束。用户基于先前 AGPL 讨论授权尝试引入；安装核对才发现核心引擎另有专有许可，现已补充说明。当前已按用户要求继续本机开发集成，没有启用 Pro 模块；该授权不代表用户已概括接受全部引擎条款、付费协议，或批准生产与对外分发。
+
+SuperDoc 另含其范围内的 `pdfjs-dist` 5.4.296（Apache-2.0），通过 scoped override 固定；它与主 PDF 预览的 `pdfjs-dist` 6.4.299 并存。其余实际打包的传递依赖及原文见生成的 `research_partner/web/workdesk/THIRD_PARTY_LICENSES.md`。工作台适配器将 telemetry 设为 disabled，不连接协作服务；这不更改上游包本身的许可。
+
+`@radix-ui/react-dropdown-menu` 2.2.1 采用 MIT 许可，用于工作台的应用文件菜单，文稿排版和审阅仍由文档引擎负责。其实际打包代码和传递依赖的完整许可文本随生成的 `research_partner/web/workdesk/THIRD_PARTY_LICENSES.md` 分发。

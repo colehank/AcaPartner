@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useRef,useState,useSyncExternalStore} from 'react';
 import MarkdownIt from 'markdown-it';
+import {useMarkdownHighlight} from './editors/markdown';
 import {renderNotebookMarkdown} from './NotebookMarkdown';
 import {noteCommand} from './api';
 import type {Session} from './session';
@@ -143,7 +144,8 @@ export function NotebookReading({session,path,viewId,jump=0,presentation,onOpenN
   const context=useRef('');context.current=session.project.id+'\n'+path;
   const [pending,setPending]=useState(false),[message,setMessage]=useState(''),[rangeNotice,setRangeNotice]=useState('');
   const buffer=session.buffers.get(path),markdown=buffer?.text||'';
-  const html=useMemo(()=>renderNotebookMarkdown(markdown,path,notebookHeadings(markdown)),[markdown,path]);
+  const highlight=useMarkdownHighlight();
+  const html=useMemo(()=>renderNotebookMarkdown(markdown,path,notebookHeadings(markdown)),[markdown,path,highlight]);
   const position=session.views[viewId]?.path===path?session.views[viewId]:{};
   const cursor=position.cursor||0,anchor=position.anchor??cursor,restoreScroll=position.restoreScroll;
   const visible=(container:HTMLElement)=>(!presentation||presentation.isVisible)&&container.isConnected&&container.clientWidth>0&&container.clientHeight>0;

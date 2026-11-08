@@ -1,6 +1,6 @@
 """Native note move/trash/restore with stable identity and durable intent.
 
-The Linux backend uses renameat2(NOREPLACE), so a competing destination is
+The backend uses Linux renameat2(NOREPLACE) or macOS renameatx_np(EXCL), so a competing destination is
 never overwritten. Markdown is unchanged. Known relative links are reported,
 not silently rewritten. Recovery reconciles only the recorded file operation;
 it never launches research or guesses an external rename from identical text.
@@ -20,10 +20,11 @@ ACTIONS={'notes.move.inspect','notes.move','notes.trash','notes.trash.list','not
 
 
 def _rename(src,name,dst,target):
-    libc=ctypes.CDLL(None,use_errno=True);fn=getattr(libc,'renameat2',None)
+    libc=ctypes.CDLL(None,use_errno=True);fn=getattr(libc,'renameat2',None);flags=1
+    if fn is None:fn=getattr(libc,'renameatx_np',None);flags=0x00000004
     require(fn is not None,'后端缺少无覆盖原子移动；未改动文件','runtime_unavailable',503)
     fn.argtypes=[ctypes.c_int,ctypes.c_char_p,ctypes.c_int,ctypes.c_char_p,ctypes.c_uint];fn.restype=ctypes.c_int
-    if fn(src,os.fsencode(name),dst,os.fsencode(target),1):
+    if fn(src,os.fsencode(name),dst,os.fsencode(target),flags):
         error=ctypes.get_errno()
         if error==errno.EEXIST:raise Problem('目标路径已存在；双方文件均保留','notes_conflict',409)
         raise OSError(error,os.strerror(error))

@@ -67,7 +67,7 @@ def _parent(root_fd, parts, *, create=False):
         os.close(current)
 
 
-def _read_at(directory_fd, name, *, absent=False, allow_hardlink=False):
+def _read_at(directory_fd, name, *, absent=False, allow_hardlink=False, max_bytes=None):
     try:
         fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory_fd)
     except FileNotFoundError as error:
@@ -80,8 +80,10 @@ def _read_at(directory_fd, name, *, absent=False, allow_hardlink=False):
         info = os.fstat(fd)
         require(stat.S_ISREG(info.st_mode) and (allow_hardlink or info.st_nlink == 1),
                 "笔记必须为普通文件且不能是硬链接", "invalid_path", 409)
+        require(max_bytes is None or info.st_size <= max_bytes, '文件超出本次文字上下文范围', 'context_limit', 413)
         with os.fdopen(fd, "rb", closefd=False) as handle:
-            raw = handle.read()
+            raw = handle.read() if max_bytes is None else handle.read(max_bytes + 1)
+        require(max_bytes is None or len(raw) <= max_bytes, '文件读取期间超出范围', 'context_limit', 413)
         return raw
     finally:
         os.close(fd)
