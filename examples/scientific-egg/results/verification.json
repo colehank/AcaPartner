@@ -1,0 +1,11 @@
+{
+  "synthetic": true,
+  "samples": 480,
+  "traces": 40080,
+  "missing_retained": 4,
+  "paired_definition_matches": true,
+  "all_group_counts_match": true,
+  "temperature_bounds_checked": true,
+  "seed_regenerates_identical_csv": true,
+  "docx_has_4_images_and_native_equations": true
+}

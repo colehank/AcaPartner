@@ -1,0 +1,20 @@
+{
+  "samples": 480,
+  "unique_ids": true,
+  "all_synthetic": true,
+  "missing_rows": [
+    "EGG-0017",
+    "EGG-0146",
+    "EGG-0259",
+    "EGG-0443"
+  ],
+  "excluded_rows": 0,
+  "group_sizes": {
+    "hard_boiled": 120,
+    "periodic": 120,
+    "soft_boiled": 120,
+    "sous_vide": 120
+  },
+  "joint_never_exceeds_either_margin": true,
+  "all_recorded_batches_present": true
+}

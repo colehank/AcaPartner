@@ -1,0 +1,63 @@
+[
+  {
+    "file": "linear-sidebar.png",
+    "assetUrl": "https://webassets.linear.app/images/ornj730p/production/b6d6be14c96978b10553cfb9205be1065087e793-3904x2720.png?w=1600&q=90",
+    "source": "https://linear.app/now/behind-the-latest-design-refresh",
+    "alt": "Side-by-side comparison of a dark app sidebar before and after a visual refresh, with notes calling out smaller icons, muted inactive text, and more vertical padding",
+    "accessed": "2026-10-26",
+    "usage": "Research reference only; not a shipping AcaPartner asset",
+    "sha256": "1114ad29dda45c2e37c127ae5ae6ce4d001a4f7f0b592faf135ab5b2d456db38"
+  },
+  {
+    "file": "linear-borders.png",
+    "assetUrl": "https://webassets.linear.app/images/ornj730p/production/67561baa677fbc429d94edd080e95aecabb6bae2-3904x2720.png?w=1600&q=90",
+    "source": "https://linear.app/now/behind-the-latest-design-refresh",
+    "alt": "Side-by-side comparison of a dark interface showing softer borders and subtler visual separation in the updated design.",
+    "accessed": "2026-10-26",
+    "usage": "Research reference only; not a shipping AcaPartner asset",
+    "sha256": "450302c9fa79943588f99c58a728dc2356c17ace31c66181764c6be36334edba"
+  },
+  {
+    "file": "craft-editor.png",
+    "assetUrl": "https://www.craft.do/_next/static/media/hero-screenshot-desktop-full.4be7130c.png",
+    "source": "https://www.craft.do/",
+    "alt": "",
+    "accessed": "2026-10-26",
+    "usage": "Research reference only; not a shipping AcaPartner asset",
+    "sha256": "402af4f0fc86c887a8eb93abecdc03f50d7c4d15e0220bb1472b998de142d702"
+  },
+  {
+    "file": "craft-app-default.png",
+    "assetUrl": "https://mintcdn.com/craft-support/L5zMoIm2o8A5WVUD/images/write-and-edit/styling/app-styles/en/content/app-style-disabled.png?fit=max&auto=format&n=L5zMoIm2o8A5WVUD&q=85&s=d0045f0dfada83655f5ca289dfe063c5",
+    "source": "https://support.craft.do/en/write-and-edit/styling/app-styles",
+    "alt": "App with default interface colors",
+    "accessed": "2026-10-26",
+    "usage": "Research reference only; not a shipping AcaPartner asset",
+    "sha256": "6afd4d1f2ca73bdf978bf8d7ef22d38681982cc1ff5bb0796c1d71d38a2acd3d"
+  },
+  {
+    "file": "craft-assistant.png",
+    "assetUrl": "https://mintcdn.com/craft-support/8R3j8_MOUDKwTvNH/images/ai-assistant/editing/en/content/execute-session.png?fit=max&auto=format&n=8R3j8_MOUDKwTvNH&q=85&s=e7d358f19991a87b7cb76dd831671763",
+    "source": "https://support.craft.do/en/ai-assistant/editing",
+    "alt": "Assistant executing edits in a document",
+    "accessed": "2026-10-26",
+    "usage": "Research reference only; not a shipping AcaPartner asset",
+    "sha256": "9e26383cda1aa9dcc67fc3794e54c7e1b075fc5efd6b653cd72da8f799a06886"
+  },
+  {
+    "file": "linear-2026-refresh.png",
+    "source": "https://linear.app/changelog/2026-03-12-ui-refresh",
+    "assetUrl": "https://webassets.linear.app/images/ornj730p/production/696c7f2b0921b5e3163710ea1b310dfb8e4e377c-3600x2080.png?w=1800&q=85",
+    "accessed": "2026-10-26",
+    "usage": "Research reference only; partial promotional image",
+    "sha256": "74755cbcc32e7793afabdcb254187c7c4ebd264088b9eb91b7928a16b133c6f9"
+  },
+  {
+    "file": "linear-structure.png",
+    "source": "https://linear.app/now/how-we-redesigned-the-linear-ui",
+    "assetUrl": "https://webassets.linear.app/images/ornj730p/production/73b5bcd3d1d73d0b15322d5cbb57c0aae7ff7b5f-2352x1380.png?w=1600&q=85",
+    "accessed": "2026-10-26",
+    "usage": "Research reference only; 2024 explanatory structure overlay",
+    "sha256": "fc567f1dac7d2b6f99452caf60eb5cc7d54388d2a78c035832cc4f1334f45dd6"
+  }
+]

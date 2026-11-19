@@ -1,6 +1,7 @@
 [build-system]
 requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+build-backend = "tools.package_resources"
+backend-path = ["."]
 
 [project]
 name = "research-partner"
@@ -10,18 +11,34 @@ requires-python = ">=3.12"
 license = "MIT"
 dependencies = []
 
+[project.optional-dependencies]
+runtime = ["psutil==7.2.2; sys_platform == 'darwin'"]
+dev = ["ruff==0.14.14", "mypy==1.18.2"]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
 [project.scripts]
 research-partner = "research_partner.__main__:main"
 
 [tool.setuptools]
 include-package-data = false
+package-dir = {"" = "src"}
+
+[tool.setuptools.cmdclass]
+build_py = "tools.package_resources.AssembleBuildPy"
+sdist = "tools.package_resources.AssembleSdist"
 
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["research_partner", "research_partner.*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-research_partner = ["web/*", "web/**/*", "native/*", "fonts/DejaVuSans.ttf", "fonts/DejaVuSans.LICENSE", "fonts/NotoSansMath-Regular.ttf", "fonts/NotoSansMath.LICENSE", "fonts/NotoEmoji-Variable.ttf", "fonts/NotoEmoji.LICENSE", "runtime-features.json"]
+research_partner = ["resources/*", "resources/**/*"]
 
 [tool.setuptools.exclude-package-data]
-research_partner = ["web/tests/*", "web/tests/**/*"]
+research_partner = ["resources/web/legacy/tests/*", "resources/web/legacy/tests/**/*"]
